@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">MemorizationApp</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_main">Main</string>
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+
+    <string name="dialog_error_title">알림</string>
+    <string name="dialog_create_folder">폴더 이름을 입력하세요.</string>
+    <string name="dialog_file_save_error">파일 저장중 오류가 발생했습니다.</string>
+    <string name="dialog_file_exist">이미 파일이 존재합니다.</string>
+
+    <string name="message_create_folder">폴더 이름을 입력하세요.</string>
+
+    <string name="common_back">뒤로</string>
+    <string name="common_save">저장</string>
+    <string name="common_create_folder">폴더 생성</string>
+</resources>
