@@ -2,7 +2,6 @@ package com.example.memorizationapp.ui.main
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,8 +9,11 @@ import android.view.animation.AnimationUtils
 import android.widget.RelativeLayout
 import androidx.fragment.app.Fragment
 import com.example.memorizationapp.R
+import com.example.memorizationapp.common.FileAdapter
+import com.example.memorizationapp.common.Node
 import com.example.memorizationapp.databinding.FragmentMainBinding
-import com.example.memorizationapp.ui.folder.FolderActivity
+import com.example.memorizationapp.model.Data
+import com.example.memorizationapp.ui.folder.CreateFolderActivity
 import java.io.File
 
 
@@ -35,8 +37,9 @@ class MainFragment : Fragment() {
         _hiddenPanelContent = binding.hiddenPanelContent
         connectionHiddenPanelAnim()
 
+        // 임시 파일 생성 연결
         binding.buttonTest.setOnClickListener {
-            val intent = Intent(requireContext(), FolderActivity::class.java)
+            val intent = Intent(requireContext(), CreateFolderActivity::class.java)
             startActivity(intent)
         }
         return root
@@ -97,34 +100,35 @@ class MainFragment : Fragment() {
 
     // 폴더 트리 가져와서 바인딩
     private fun getFolderTree() {
-//        Log.d(TAG, "Internal app's cache dir: " + context?.cacheDir?.absolutePath)
-//        Log.d(TAG, "Internal app's file dir: " + context?.filesDir?.getAbsolutePath())
-        //val asdf = File(context?.filesDir, "Pictures")
-        //val directory = File(Environment.getExternalStorageDirectory().absolutePath)
         val directory = File(context?.filesDir?.getAbsolutePath())
-        //val directory = File("/data/user/0/com.example.memorizationapp/files")
-        var test: String = ""
-        // Check if the path points to a directory
+        var list: List<Node<Data>> = listOf()
         if (directory.isDirectory) {
-            // Get an array of File objects representing the files and directories in the specified directory
             val files = directory.listFiles()
-
             if (files != null) {
-                // Iterate through the files and print the names of directories
                 for (file in files) {
-                    if (file.isDirectory) {
-                        test += "Folder: ${file.name}"
-                    }
+                    list = list + getFolderAndFile(file)
                 }
-            } else {
-                test += "No files found in the directory."
+            }
+        }
+        val recyclerView = binding.recyclerViewFolderList
+        recyclerView.adapter = FileAdapter(list)
+    }
+
+    // 파일 또는 폴더 가져오기
+    private fun getFolderAndFile(directory: File): Node<Data> {
+        var item: Node<Data>? = null
+        if (directory.isDirectory) {
+            item = Node<Data>(Data.Directory(directory.name))
+            val files = directory.listFiles()
+            if (files != null) {
+                for (file in files) {
+                    item.addChild(getFolderAndFile(file))
+                }
             }
         } else {
-            test += "The specified path is not a directory."
+            item = Node<Data>(Data.File(directory.name))
         }
-
-        val textView = binding.testTv
-        textView.text = test
+        return item
     }
 
     override fun onDestroyView() {
