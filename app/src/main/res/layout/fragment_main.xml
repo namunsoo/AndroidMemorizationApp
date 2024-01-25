@@ -52,11 +52,55 @@
             android:clickable="true"
             android:layout_alignParentBottom="true">
 
-            <Button
-                android:id="@+id/button_test"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Button"/>
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:text="카드 또는 파일 추가"
+                    android:textSize="20dp"
+                    android:textStyle="bold"
+                    android:textColor="@color/basics_base_level4"/>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="@color/basics_base_level4">
+                </View>
+
+                <Button
+                    android:id="@+id/bnt_create_file"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#00000000"
+                    android:drawableLeft="@drawable/ic_file_add"
+                    android:text="@string/common_file_create"
+                    android:textAlignment="textStart"
+                    android:textStyle="bold"
+                    android:textColor="@color/basics_textColor"
+                    android:drawableTint="@color/basics_textColor"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    />
+
+                <Button
+                    android:id="@+id/bnt_create_folder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#00000000"
+                    android:drawableLeft="@drawable/ic_folder_create"
+                    android:drawableTint="@color/basics_textColor"
+                    android:text="@string/common_folder_create"
+                    android:textStyle="bold"
+                    android:textAlignment="textStart"
+                    android:textColor="@color/basics_textColor"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    />
+
+
+            </LinearLayout>
         </RelativeLayout>
 
     </RelativeLayout>

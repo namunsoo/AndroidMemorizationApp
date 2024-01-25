@@ -3,11 +3,11 @@ package com.example.memorizationapp.ui.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.memorizationapp.common.Node
+import com.example.memorizationapp.model.Data
 
 class MainViewModel : ViewModel() {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is gallery Fragment"
-    }
-    val text: LiveData<String> = _text
+    var nodes = mutableListOf<Node<Data>>()
+
 }

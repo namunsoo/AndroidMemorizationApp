@@ -7,13 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.RelativeLayout
+import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
+import com.example.memorizationapp.MainActivity
 import com.example.memorizationapp.R
 import com.example.memorizationapp.common.FileAdapter
 import com.example.memorizationapp.common.Node
 import com.example.memorizationapp.databinding.FragmentMainBinding
 import com.example.memorizationapp.model.Data
-import com.example.memorizationapp.ui.folder.CreateFolderActivity
+import com.example.memorizationapp.ui.folder.FolderViewModel
 import java.io.File
 
 
@@ -25,24 +29,43 @@ class MainFragment : Fragment() {
     private var _hiddenPanelMain: RelativeLayout? = null
     private var _hiddenPanelContent: RelativeLayout? = null
 
+    private lateinit var mainViewModel: MainViewModel
+    private lateinit var folderViewModel : FolderViewModel
+    private lateinit var _mActivity : MainActivity
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMainBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
         _hiddenPanelMain = binding.hiddenPanelMain
         _hiddenPanelContent = binding.hiddenPanelContent
+        _mActivity = activity as MainActivity
+
+        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
+        folderViewModel = ViewModelProvider(requireActivity())[FolderViewModel::class.java]
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         connectionHiddenPanelAnim()
 
-        // 임시 파일 생성 연결
-        binding.buttonTest.setOnClickListener {
-            val intent = Intent(requireContext(), CreateFolderActivity::class.java)
-            startActivity(intent)
+        // 파일 생성 연결
+        binding.bntCreateFile.setOnClickListener {
+//            val intent = Intent(requireContext(), CreateFolderActivity::class.java)
+//            startActivity(intent)
+            _mActivity.changeFragment(R.id.nav_home)
         }
-        return root
+
+        // 폴더 생성 연결
+        binding.bntCreateFolder.setOnClickListener {
+            folderViewModel.setValues("","create","", null, null)
+            _mActivity.changeFragment(R.id.nav_folder)
+        }
     }
 
     override fun onStart() {
@@ -76,7 +99,7 @@ class MainFragment : Fragment() {
             )
             _hiddenPanelMain?.startAnimation(fadeIn)
             _hiddenPanelContent?.startAnimation(bottomUp)
-            _hiddenPanelMain?.setVisibility(View.VISIBLE)
+            _hiddenPanelMain?.visibility = View.VISIBLE
         } else {
             // Hide the Panel
             val fadeOut = AnimationUtils.loadAnimation(
@@ -89,7 +112,7 @@ class MainFragment : Fragment() {
             )
             _hiddenPanelContent?.startAnimation(bottomDown)
             _hiddenPanelMain?.startAnimation(fadeOut)
-            _hiddenPanelMain?.setVisibility(View.GONE)
+            _hiddenPanelMain?.visibility = View.GONE
         }
     }
 
@@ -100,25 +123,28 @@ class MainFragment : Fragment() {
 
     // 폴더 트리 가져와서 바인딩
     private fun getFolderTree() {
-        val directory = File(context?.filesDir?.getAbsolutePath())
-        var list: List<Node<Data>> = listOf()
-        if (directory.isDirectory) {
+        val directory = File(context?.filesDir?.absolutePath)
+        var list = listOf<Node<Data>>()
+        val recyclerView = binding.recyclerViewFolderList
+        if (directory.isDirectory && mainViewModel.nodes.isEmpty()) {
             val files = directory.listFiles()
             if (files != null) {
                 for (file in files) {
                     list = list + getFolderAndFile(file)
                 }
             }
+            mainViewModel.nodes = list.toMutableList()
+        } else {
+            list = mainViewModel.nodes
         }
-        val recyclerView = binding.recyclerViewFolderList
-        recyclerView.adapter = FileAdapter(list)
+        recyclerView.adapter = FileAdapter(_mActivity,list)
     }
 
     // 파일 또는 폴더 가져오기
     private fun getFolderAndFile(directory: File): Node<Data> {
-        var item: Node<Data>? = null
+        val item: Node<Data>
         if (directory.isDirectory) {
-            item = Node<Data>(Data.Directory(directory.name))
+            item = Node(Data.Directory(directory.name))
             val files = directory.listFiles()
             if (files != null) {
                 for (file in files) {
@@ -126,7 +152,7 @@ class MainFragment : Fragment() {
                 }
             }
         } else {
-            item = Node<Data>(Data.File(directory.name))
+            item = Node(Data.File(directory.name))
         }
         return item
     }

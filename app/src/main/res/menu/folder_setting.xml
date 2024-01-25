@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_card_create"
+        android:icon="@drawable/ic_file_add"
+        android:title="@string/common_file_create"/>
+    <item
+        android:id="@+id/action_folder_create"
+        android:icon="@drawable/ic_folder_create"
+        android:title="@string/common_folder_create" />
+    <item
+        android:id="@+id/action_folder_update"
+        android:icon="@drawable/ic_update"
+        android:title="@string/common_update" />
+    <item
+        android:id="@+id/action_folder_delete_with_sub"
+        android:icon="@drawable/ic_delete"
+        android:title="@string/common_delete" />
+    <item
+        android:id="@+id/action_folder_delete_only"
+        android:icon="@drawable/ic_folder_off"
+        android:title="@string/common_delete_only_folder" />
+</menu>

@@ -11,9 +11,10 @@ abstract class TreeViewHolder<T>(itemView: View) : RecyclerView.ViewHolder(itemV
 
     abstract fun bind(data: Node<T>)
 
-    open fun setPaddingStart(data: Node<T>) = with(itemView) {
+    open fun setPaddingStart(data: Node<T>): Int = with(itemView) {
         val depth = data.depth
         itemView.setPadding(padding * depth, paddingTop, paddingRight, paddingBottom)
+        return padding * depth
     }
 
     companion object {

@@ -1,14 +1,19 @@
 package com.example.memorizationapp.common
 
+import com.example.memorizationapp.model.Data
+
+
 class Node<T>(val content: T) {
 
     var parent: Node<T>? = null
+        get() = field
 
     private val _children = mutableListOf<Node<T>>()
+
     val children: List<Node<T>>
         get() = _children
 
-    var isExpand = true
+    var isExpand = false
         private set
 
     val isRoot: Boolean

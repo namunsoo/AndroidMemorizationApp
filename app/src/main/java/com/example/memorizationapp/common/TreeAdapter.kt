@@ -23,8 +23,8 @@ abstract class TreeAdapter<T, VH: TreeViewHolder<T>>(
         }
     }
 
-    open fun toggle(node: Node<T>) {
-        if (node.isLeaf) return
+    open fun toggle(node: Node<T>): Boolean {
+        if (node.isLeaf) return false
 
         val isExpand = node.isExpand
         val startPosition = displayNodes.indexOf(node) + 1
@@ -33,6 +33,12 @@ abstract class TreeAdapter<T, VH: TreeViewHolder<T>>(
             notifyItemRangeRemoved(startPosition, removeChildNodes(node, true))
         else
             notifyItemRangeInserted(startPosition, addChildNodes(node, startPosition))
+        return !isExpand
+    }
+
+    fun replace(node: Node<T>) {
+        displayNodes.remove(node)
+        notifyDataSetChanged()
     }
 
     fun replaceAll(nodes: List<Node<T>>) {
