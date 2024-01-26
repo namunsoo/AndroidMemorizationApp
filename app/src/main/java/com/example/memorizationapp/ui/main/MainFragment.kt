@@ -1,20 +1,18 @@
 package com.example.memorizationapp.ui.main
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.RelativeLayout
-import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.memorizationapp.MainActivity
 import com.example.memorizationapp.R
-import com.example.memorizationapp.common.FileAdapter
-import com.example.memorizationapp.common.Node
+import com.example.memorizationapp.common.fileHellper.FileAdapter
+import com.example.memorizationapp.common.fileHellper.Node
 import com.example.memorizationapp.databinding.FragmentMainBinding
 import com.example.memorizationapp.model.Data
 import com.example.memorizationapp.ui.folder.FolderViewModel
@@ -66,6 +64,11 @@ class MainFragment : Fragment() {
             folderViewModel.setValues("","create","", null, null)
             _mActivity.changeFragment(R.id.nav_folder)
         }
+
+        mainViewModel.isActive.observe(viewLifecycleOwner, Observer { newData ->
+            val recyclerView = binding.recyclerViewFolderList
+            recyclerView.adapter = FileAdapter(_mActivity,mainViewModel.nodes)
+        })
     }
 
     override fun onStart() {
@@ -156,6 +159,8 @@ class MainFragment : Fragment() {
         }
         return item
     }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

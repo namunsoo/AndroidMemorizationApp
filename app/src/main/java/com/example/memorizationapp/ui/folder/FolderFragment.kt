@@ -8,17 +8,16 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import com.example.memorizationapp.MainActivity
 import com.example.memorizationapp.R
-import com.example.memorizationapp.common.Node
+import com.example.memorizationapp.common.fileHellper.FileTreeCommon
+import com.example.memorizationapp.common.fileHellper.Node
 import com.example.memorizationapp.databinding.FragmentFolderBinding
 import com.example.memorizationapp.model.Data
 import com.example.memorizationapp.ui.main.MainViewModel
@@ -35,6 +34,7 @@ class FolderFragment : Fragment() {
     private lateinit var mainViewModel : MainViewModel
     private lateinit var folderViewModel : FolderViewModel
     private lateinit var _mActivity : MainActivity
+    private val fileTreeCommon = FileTreeCommon
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,13 +55,23 @@ class FolderFragment : Fragment() {
         val name = folderViewModel.folderName.value.toString()
         val actionType = folderViewModel.action.value.toString()
         binding.fileName.setText(name)
+        when (actionType) {
+            "create" -> {
+                _mActivity.supportActionBar?.setTitle(R.string.menu_folder_create)
+            }
+            "update" -> {
+                _mActivity.supportActionBar?.setTitle(R.string.menu_folder_update)
+            }
+        }
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(object : MenuProvider {
+            // 기존 menu 지우고 check menu 설정
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menu.clear()
                 menuInflater.inflate(R.menu.check, menu)
             }
 
+            // menu 클릭 이벤트 설정
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.check -> {
@@ -85,10 +95,12 @@ class FolderFragment : Fragment() {
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
+    // 폴더 생성
     private fun createFolder(fileName: String, context: Context) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         var dialog: AlertDialog
         try {
+            // 파일 생성
             val parentPath = folderViewModel.folderPath.value.toString()
             val dir = File(_mActivity.filesDir.absolutePath +parentPath, fileName)
             if (dir.exists()) {
@@ -97,16 +109,15 @@ class FolderFragment : Fragment() {
                 dialog = builder.create()
                 dialog.show()
             } else {
-                //dir.mkdirs()
+                dir.mkdirs()
             }
-            val test = folderViewModel.node!!.value
-            val test22 = folderViewModel.position.value!!
-//            mainViewModel.nodes.remove(folderViewModel.node!!.value)
-//            var test = mainViewModel.nodes[0].children.filter {item -> item.content.name == folderViewModel.node.value!!.content.name}.first().content.name
+
+            // MainViewModel 수정
             if (folderViewModel.position.value == null){
-                //mainViewModel.nodes.add(Node(Data.Directory(fileName)))
+                mainViewModel.nodes.add(Node(Data.Directory(fileName)))
             } else {
-                //mainViewModel.nodes[folderViewModel.position.value!!].addChild(Node(Data.Directory(fileName)))
+                val pathNodeList = fileTreeCommon.getTargetTree(folderViewModel.node.value!!)
+                fileTreeCommon.addNewNode(mainViewModel.nodes, pathNodeList, 0, Node(Data.Directory(fileName)))
             }
         } catch(e: Exception) {
             builder.setMessage(R.string.dialog_folder_create_error)
@@ -116,6 +127,7 @@ class FolderFragment : Fragment() {
         }
     }
 
+    // 폴더 이름 수정
     private fun updateFolder(newFolderName: String, context: Context){
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         var dialog: AlertDialog
@@ -123,29 +135,26 @@ class FolderFragment : Fragment() {
         val oldFolder = File(_mActivity.filesDir.absolutePath + oldFolderPath)
 
         try {
-//            if (oldFolder.exists() && oldFolder.isDirectory && folderViewModel.position.value != null) {
-//                val newFolder = File(oldFolder.parent!!,newFolderName)
-//
-//                // Rename the folder
-//                if (!oldFolder.renameTo(newFolder)) {
-//                    builder.setMessage(R.string.dialog_folder_update_error)
-//                        .setTitle(R.string.dialog_error_title)
-//                    dialog = builder.create()
-//                    dialog.show()
-//                } else {
-//                    val childrens = mainViewModel.nodes[folderViewModel.position.value!!].children
-//                    var newNode : Node<Data> = Node(Data.Directory(newFolderName))
-//                    for ( children in childrens) {
-//                        newNode.addChild(children)
-//                    }
-//                    mainViewModel.nodes[folderViewModel.position.value!!] = Node(Data.Directory(newFolderName))
-//                }
-//            } else {
-//                builder.setMessage(R.string.dialog_folder_not_exist)
-//                    .setTitle(R.string.dialog_error_title)
-//                dialog = builder.create()
-//                dialog.show()
-//            }
+            if (oldFolder.exists() && oldFolder.isDirectory && folderViewModel.position.value != null) {
+                val newFolder = File(oldFolder.parent!!,newFolderName)
+
+                if (!oldFolder.renameTo(newFolder)) {
+                    builder.setMessage(R.string.dialog_folder_update_error)
+                        .setTitle(R.string.dialog_error_title)
+                    dialog = builder.create()
+                    dialog.show()
+                } else {
+                    // MainViewModel 수정
+                    val pathNodeList = fileTreeCommon.getTargetTree(folderViewModel.node.value!!)
+                    fileTreeCommon.updateNode(mainViewModel.nodes, pathNodeList, 0, newFolderName)
+                }
+
+            } else {
+                builder.setMessage(R.string.dialog_folder_not_exist)
+                    .setTitle(R.string.dialog_error_title)
+                dialog = builder.create()
+                dialog.show()
+            }
         } catch(e: Exception) {
             builder.setMessage(R.string.dialog_folder_update_error)
                 .setTitle(R.string.dialog_error_title)

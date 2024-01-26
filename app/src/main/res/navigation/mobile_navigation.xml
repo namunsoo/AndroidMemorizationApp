@@ -14,8 +14,14 @@
     <fragment
         android:id="@+id/nav_folder"
         android:name="com.example.memorizationapp.ui.folder.FolderFragment"
-        android:label="@string/menu_main"
+        android:label="@string/menu_folder"
         tools:layout="@layout/fragment_folder" />
+
+    <fragment
+        android:id="@+id/nav_file"
+        android:name="com.example.memorizationapp.ui.folder.FolderFragment"
+        android:label="@string/menu_file"
+        tools:layout="@layout/fragment_file" />
 
     <fragment
         android:id="@+id/nav_home"

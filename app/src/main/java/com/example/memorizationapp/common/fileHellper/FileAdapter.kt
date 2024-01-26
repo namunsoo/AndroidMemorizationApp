@@ -1,4 +1,4 @@
-package com.example.memorizationapp.common
+package com.example.memorizationapp.common.fileHellper
 
 import android.content.res.Resources
 import android.view.LayoutInflater
@@ -8,14 +8,20 @@ import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.ViewModelProvider
 import com.example.memorizationapp.MainActivity
 import com.example.memorizationapp.R
 import com.example.memorizationapp.databinding.ItemFolderBinding
 import com.example.memorizationapp.databinding.ItemFileBinding
 import com.example.memorizationapp.model.Data
+import com.example.memorizationapp.ui.folder.FolderViewModel
+import com.example.memorizationapp.ui.main.MainViewModel
 import java.io.File
 
 class FileAdapter(private val _mActivity: MainActivity, nodes: List<Node<Data>>) : TreeAdapter<Data, TreeViewHolder<Data>>(nodes) {
+    private lateinit var mainViewModel : MainViewModel
+    private lateinit var folderViewModel : FolderViewModel
+    private val fileTreeCommon = FileTreeCommon
 
     override fun getItemViewType(position: Int): Int {
         val data = displayNodes[position]
@@ -24,6 +30,9 @@ class FileAdapter(private val _mActivity: MainActivity, nodes: List<Node<Data>>)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TreeViewHolder<Data> {
+        mainViewModel = ViewModelProvider(_mActivity)[MainViewModel::class.java]
+        folderViewModel = ViewModelProvider(_mActivity)[FolderViewModel::class.java]
+
         val layoutInflater = LayoutInflater.from(parent.context)
 
         return if (viewType == FILE)
@@ -83,28 +92,15 @@ class FileAdapter(private val _mActivity: MainActivity, nodes: List<Node<Data>>)
             popupMenu.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.action_folder_create -> {
-                        _mActivity.setFolderViewModel(path,"create","", data, position)
+                        folderViewModel.setValues(path,"create","", data, position)
                         _mActivity.changeFragment(R.id.nav_folder)
                     }
                     R.id.action_folder_update -> {
-                        _mActivity.setFolderViewModel(path,"update",name, data, position)
+                        folderViewModel.setValues(path,"update",name, data, position)
                         _mActivity.changeFragment(R.id.nav_folder)
                     }
                     R.id.action_folder_delete_with_sub -> {
-                        val builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
-                        builder.setMessage(R.string.dialog_folder_delete)
-                            .setTitle(R.string.dialog_title)
-                        // 확인 이벤트
-                        builder.setPositiveButton(R.string.common_confirm) { dialog, _ ->
-                            deleteFolder(path)
-                            replace(data)
-                            dialog.dismiss()
-                        }
-                        // 취소 이벤트
-                        builder.setNegativeButton(R.string.common_cancel) { dialog, _ ->
-                            dialog.dismiss()
-                        }
-                        builder.create().show()
+                        deleteFolder(path, data)
                     }
                 }
                 false
@@ -114,31 +110,44 @@ class FileAdapter(private val _mActivity: MainActivity, nodes: List<Node<Data>>)
         }
     }
 
-    private fun deleteFolder(path: String){
+    private fun deleteFolder(path: String, data: Node<Data>){
         val folder = File(_mActivity.filesDir.absolutePath + path)
-        val builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
-        var dialog: AlertDialog
-        try {
-            if (folder.exists() && folder.isDirectory) {
-                if (!folder.deleteRecursively()) {
-                    builder.setMessage(R.string.dialog_folder_delete_error)
+        var builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
+        builder.setMessage(R.string.dialog_folder_delete)
+            .setTitle(R.string.dialog_title)
+        // 확인 이벤트
+        builder.setPositiveButton(R.string.common_confirm) { dialog, _ ->
+            dialog.dismiss()
+            builder = AlertDialog.Builder(_mActivity)
+            try {
+                if (folder.exists() && folder.isDirectory) {
+//                    if (!folder.deleteRecursively()) {
+//                        builder.setMessage(R.string.dialog_folder_delete_error)
+//                            .setTitle(R.string.dialog_error_title)
+//                        builder.create().show()
+//                    } else {
+//                    }
+                    val pathNodeList = fileTreeCommon.getTargetTree(data)
+                    fileTreeCommon.deleteNode(mainViewModel.nodes, pathNodeList, 0)
+                    mainViewModel.changeValueEvent()
+                } else {
+                    builder.setMessage(R.string.dialog_folder_not_exist)
                         .setTitle(R.string.dialog_error_title)
-                    dialog = builder.create()
-                    dialog.show()
+                    builder.create().show()
                 }
-            } else {
-                builder.setMessage(R.string.dialog_folder_not_exist)
+            } catch(e: Exception) {
+                builder.setMessage(R.string.dialog_folder_delete_error)
                     .setTitle(R.string.dialog_error_title)
-                dialog = builder.create()
-                dialog.show()
+                builder.create().show()
             }
-        } catch(e: Exception) {
-            builder.setMessage(R.string.dialog_folder_delete_error)
-                .setTitle(R.string.dialog_error_title)
-            dialog = builder.create()
-            dialog.show()
         }
+        // 취소 이벤트
+        builder.setNegativeButton(R.string.common_cancel) { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.create().show()
     }
+
     companion object {
         private const val FILE = 0
         private const val DIRECTORY = 1

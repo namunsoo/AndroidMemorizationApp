@@ -11,9 +11,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
-import com.example.memorizationapp.common.Node
 import com.example.memorizationapp.databinding.ActivityMainBinding
-import com.example.memorizationapp.model.Data
 import com.example.memorizationapp.ui.folder.FolderViewModel
 import com.example.memorizationapp.ui.main.MainViewModel
 
@@ -68,10 +66,6 @@ class MainActivity : AppCompatActivity() {
                 navController.navigate(R.id.nav_home)
             }
         }
-    }
-
-    fun setFolderViewModel(folderPath : String, action : String, folderName : String, node: Node<Data>?, position: Int?){
-        folderViewModel.setValues(folderPath,action,folderName,node,position)
     }
 
     fun goBack(){

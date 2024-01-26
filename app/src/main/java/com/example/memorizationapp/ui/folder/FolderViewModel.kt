@@ -3,7 +3,7 @@ package com.example.memorizationapp.ui.folder
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.memorizationapp.common.Node
+import com.example.memorizationapp.common.fileHellper.Node
 import com.example.memorizationapp.model.Data
 
 class FolderViewModel : ViewModel() {

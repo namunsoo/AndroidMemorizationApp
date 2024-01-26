@@ -1,4 +1,4 @@
-package com.example.memorizationapp.common
+package com.example.memorizationapp.common.fileHellper
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView

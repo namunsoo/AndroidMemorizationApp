@@ -1,16 +1,13 @@
-package com.example.memorizationapp.common
-
-import com.example.memorizationapp.model.Data
+package com.example.memorizationapp.common.fileHellper
 
 
 class Node<T>(val content: T) {
 
     var parent: Node<T>? = null
-        get() = field
 
     private val _children = mutableListOf<Node<T>>()
 
-    val children: List<Node<T>>
+    val children: MutableList<Node<T>>
         get() = _children
 
     var isExpand = false
