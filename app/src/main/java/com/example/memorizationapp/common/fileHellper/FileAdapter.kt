@@ -14,6 +14,7 @@ import com.example.memorizationapp.R
 import com.example.memorizationapp.databinding.ItemFolderBinding
 import com.example.memorizationapp.databinding.ItemFileBinding
 import com.example.memorizationapp.model.Data
+import com.example.memorizationapp.ui.MainActivityViewModel
 import com.example.memorizationapp.ui.folder.FolderViewModel
 import com.example.memorizationapp.ui.main.MainViewModel
 import java.io.File
@@ -21,6 +22,7 @@ import java.io.File
 class FileAdapter(private val _mActivity: MainActivity, nodes: List<Node<Data>>) : TreeAdapter<Data, TreeViewHolder<Data>>(nodes) {
     private lateinit var mainViewModel : MainViewModel
     private lateinit var folderViewModel : FolderViewModel
+    private lateinit var mainActivityViewModel : MainActivityViewModel
     private val fileTreeCommon = FileTreeCommon
 
     override fun getItemViewType(position: Int): Int {
@@ -32,6 +34,7 @@ class FileAdapter(private val _mActivity: MainActivity, nodes: List<Node<Data>>)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TreeViewHolder<Data> {
         mainViewModel = ViewModelProvider(_mActivity)[MainViewModel::class.java]
         folderViewModel = ViewModelProvider(_mActivity)[FolderViewModel::class.java]
+        mainActivityViewModel = ViewModelProvider(_mActivity)[MainActivityViewModel::class.java]
 
         val layoutInflater = LayoutInflater.from(parent.context)
 
@@ -48,16 +51,6 @@ class FileAdapter(private val _mActivity: MainActivity, nodes: List<Node<Data>>)
     override fun onBindViewHolder(holder: TreeViewHolder<Data>, position: Int) {
         val data = displayNodes[position]
         holder.bind(data)
-
-        // 상위 경로 생성
-        val name = data.content.name
-        var path : String = ""
-        var tempData = data
-        while(!tempData.isRoot){
-            path = "/" + tempData.parent?.content?.name + path
-            tempData = tempData.parent!!
-        }
-        path = "$path/$name"
 
         val item : ConstraintLayout = (holder.itemView as ConstraintLayout).getChildAt(0) as ConstraintLayout
         val arrow = item.getViewById(R.id.iv_arrow) as ImageView
@@ -92,15 +85,15 @@ class FileAdapter(private val _mActivity: MainActivity, nodes: List<Node<Data>>)
             popupMenu.setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.action_folder_create -> {
-                        folderViewModel.setValues(path,"create","", data, position)
+                        folderViewModel.setValues("create","", data)
                         _mActivity.changeFragment(R.id.nav_folder)
                     }
                     R.id.action_folder_update -> {
-                        folderViewModel.setValues(path,"update",name, data, position)
+                        folderViewModel.setValues("update",data.content.name, data)
                         _mActivity.changeFragment(R.id.nav_folder)
                     }
                     R.id.action_folder_delete_with_sub -> {
-                        deleteFolder(path, data)
+                        deleteFolder(data)
                     }
                 }
                 false
@@ -110,8 +103,7 @@ class FileAdapter(private val _mActivity: MainActivity, nodes: List<Node<Data>>)
         }
     }
 
-    private fun deleteFolder(path: String, data: Node<Data>){
-        val folder = File(_mActivity.filesDir.absolutePath + path)
+    private fun deleteFolder(node: Node<Data>){
         var builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
         builder.setMessage(R.string.dialog_folder_delete)
             .setTitle(R.string.dialog_title)
@@ -120,21 +112,18 @@ class FileAdapter(private val _mActivity: MainActivity, nodes: List<Node<Data>>)
             dialog.dismiss()
             builder = AlertDialog.Builder(_mActivity)
             try {
-                if (folder.exists() && folder.isDirectory) {
-//                    if (!folder.deleteRecursively()) {
-//                        builder.setMessage(R.string.dialog_folder_delete_error)
-//                            .setTitle(R.string.dialog_error_title)
-//                        builder.create().show()
-//                    } else {
-//                    }
-                    val pathNodeList = fileTreeCommon.getTargetTree(data)
-                    fileTreeCommon.deleteNode(mainViewModel.nodes, pathNodeList, 0)
-                    mainViewModel.changeValueEvent()
-                } else {
-                    builder.setMessage(R.string.dialog_folder_not_exist)
-                        .setTitle(R.string.dialog_error_title)
-                    builder.create().show()
-                }
+                // MainViewModel 수정
+                val pathNodeList = fileTreeCommon.getTargetTree(node)
+                fileTreeCommon.deleteNode(mainViewModel.nodes, pathNodeList, 0)
+
+                // MainActivityViewModel 수정
+                val data = mainActivityViewModel.fileTreeJson.value!!
+                val nameList = fileTreeCommon.getTargetJson(node)
+                fileTreeCommon.deleteJsonObject(data.getJSONArray("data"), nameList, 0)
+
+                // json 파일 수정
+                val fileTree = File(_mActivity.filesDir.absolutePath, "file_tree.json")
+                fileTree.writeText(data.toString())
             } catch(e: Exception) {
                 builder.setMessage(R.string.dialog_folder_delete_error)
                     .setTitle(R.string.dialog_error_title)

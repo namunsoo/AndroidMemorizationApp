@@ -8,10 +8,4 @@ import com.example.memorizationapp.model.Data
 
 class MainViewModel : ViewModel() {
     var nodes = mutableListOf<Node<Data>>()
-    private val _isActive  = MutableLiveData(false)
-    val isActive: LiveData<Boolean> get() = _isActive
-
-    fun changeValueEvent() {
-        _isActive.value = !_isActive.value!!
-    }
 }

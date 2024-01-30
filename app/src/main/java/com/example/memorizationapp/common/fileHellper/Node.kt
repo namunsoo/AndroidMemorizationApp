@@ -11,7 +11,6 @@ class Node<T>(val content: T) {
         get() = _children
 
     var isExpand = false
-        private set
 
     val isRoot: Boolean
         get() = parent == null

@@ -1,5 +1,6 @@
 package com.example.memorizationapp.ui.main
 
+import android.database.Cursor
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,12 +12,15 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.memorizationapp.MainActivity
 import com.example.memorizationapp.R
+import com.example.memorizationapp.common.database.DB
 import com.example.memorizationapp.common.fileHellper.FileAdapter
 import com.example.memorizationapp.common.fileHellper.Node
 import com.example.memorizationapp.databinding.FragmentMainBinding
 import com.example.memorizationapp.model.Data
+import com.example.memorizationapp.ui.MainActivityViewModel
+import com.example.memorizationapp.ui.file.FileViewModel
 import com.example.memorizationapp.ui.folder.FolderViewModel
-import java.io.File
+import org.json.JSONObject
 
 
 class MainFragment : Fragment() {
@@ -29,6 +33,8 @@ class MainFragment : Fragment() {
 
     private lateinit var mainViewModel: MainViewModel
     private lateinit var folderViewModel : FolderViewModel
+    private lateinit var fileViewModel: FileViewModel
+    private lateinit var mainActivityViewModel : MainActivityViewModel
     private lateinit var _mActivity : MainActivity
 
     override fun onCreateView(
@@ -44,6 +50,8 @@ class MainFragment : Fragment() {
 
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
         folderViewModel = ViewModelProvider(requireActivity())[FolderViewModel::class.java]
+        fileViewModel = ViewModelProvider(requireActivity())[FileViewModel::class.java]
+        mainActivityViewModel = ViewModelProvider(requireActivity())[MainActivityViewModel::class.java]
         return binding.root
     }
 
@@ -54,26 +62,19 @@ class MainFragment : Fragment() {
 
         // 파일 생성 연결
         binding.bntCreateFile.setOnClickListener {
-//            val intent = Intent(requireContext(), CreateFolderActivity::class.java)
-//            startActivity(intent)
-            _mActivity.changeFragment(R.id.nav_home)
+            fileViewModel.setValues("create","")
+            _mActivity.changeFragment(R.id.nav_file)
         }
 
         // 폴더 생성 연결
         binding.bntCreateFolder.setOnClickListener {
-            folderViewModel.setValues("","create","", null, null)
+            folderViewModel.setValues("create","")
             _mActivity.changeFragment(R.id.nav_folder)
         }
 
-        mainViewModel.isActive.observe(viewLifecycleOwner, Observer { newData ->
-            val recyclerView = binding.recyclerViewFolderList
-            recyclerView.adapter = FileAdapter(_mActivity,mainViewModel.nodes)
+        mainActivityViewModel.fileTreeJson.observe(viewLifecycleOwner, Observer {
+            getFolderTree()
         })
-    }
-
-    override fun onStart() {
-        super.onStart()
-        getFolderTree()
     }
 
     // 패널 애니메이션 연결
@@ -124,38 +125,34 @@ class MainFragment : Fragment() {
         return _hiddenPanelMain?.visibility == View.VISIBLE
     }
 
-    // 폴더 트리 가져와서 바인딩
+    // 폴더 트리 가져오기
     private fun getFolderTree() {
-        val directory = File(context?.filesDir?.absolutePath)
         var list = listOf<Node<Data>>()
-        val recyclerView = binding.recyclerViewFolderList
-        if (directory.isDirectory && mainViewModel.nodes.isEmpty()) {
-            val files = directory.listFiles()
-            if (files != null) {
-                for (file in files) {
-                    list = list + getFolderAndFile(file)
-                }
+        if(mainActivityViewModel.fileTreeJson.value != null && mainViewModel.nodes.isEmpty()){
+            val jsonObject = mainActivityViewModel.fileTreeJson.value!!
+            val jsonArray = jsonObject.getJSONArray("data")
+            for (i in 0 until jsonArray.length()) {
+                list = list + getNodeFromJson(jsonArray.getJSONObject(i))
             }
             mainViewModel.nodes = list.toMutableList()
         } else {
             list = mainViewModel.nodes
         }
+        val recyclerView = binding.recyclerViewFolderList
         recyclerView.adapter = FileAdapter(_mActivity,list)
     }
 
-    // 파일 또는 폴더 가져오기
-    private fun getFolderAndFile(directory: File): Node<Data> {
+    // json 파일에서 트리 데이터 가져오기
+    private fun getNodeFromJson(jsonObject: JSONObject): Node<Data> {
         val item: Node<Data>
-        if (directory.isDirectory) {
-            item = Node(Data.Directory(directory.name))
-            val files = directory.listFiles()
-            if (files != null) {
-                for (file in files) {
-                    item.addChild(getFolderAndFile(file))
-                }
+        if (jsonObject.getString("type").equals("folder")) {
+            item = Node(Data.Directory(jsonObject.getString("name")))
+            val children = jsonObject.getJSONArray("children")
+            for (i in 0 until children.length()) {
+                item.addChild(getNodeFromJson(children.getJSONObject(i)))
             }
         } else {
-            item = Node(Data.File(directory.name))
+            item = Node(Data.File(jsonObject.getString("name")))
         }
         return item
     }
