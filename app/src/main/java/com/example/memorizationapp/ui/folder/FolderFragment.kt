@@ -1,6 +1,5 @@
 package com.example.memorizationapp.ui.folder
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -16,15 +15,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import com.example.memorizationapp.MainActivity
 import com.example.memorizationapp.R
-import com.example.memorizationapp.common.fileHellper.FileTreeCommon
-import com.example.memorizationapp.common.fileHellper.Node
+import com.example.memorizationapp.common.database.DBHelper
+import com.example.memorizationapp.common.treeRecyclerView.FolderTreeCommon
+import com.example.memorizationapp.common.treeRecyclerView.Item
 import com.example.memorizationapp.databinding.FragmentFolderBinding
-import com.example.memorizationapp.model.Data
-import com.example.memorizationapp.ui.MainActivityViewModel
 import com.example.memorizationapp.ui.main.MainViewModel
-import org.json.JSONArray
-import org.json.JSONObject
-import java.io.File
 
 class FolderFragment : Fragment() {
 
@@ -33,12 +28,11 @@ class FolderFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    private val folderTreeCommon = FolderTreeCommon
 
-    private lateinit var mainViewModel : MainViewModel
+    private lateinit var mainViewModel: MainViewModel
     private lateinit var folderViewModel : FolderViewModel
-    private lateinit var mainActivityViewModel : MainActivityViewModel
     private lateinit var _mActivity : MainActivity
-    private val fileTreeCommon = FileTreeCommon
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,7 +43,6 @@ class FolderFragment : Fragment() {
 
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
         folderViewModel = ViewModelProvider(requireActivity())[FolderViewModel::class.java]
-        mainActivityViewModel = ViewModelProvider(requireActivity())[MainActivityViewModel::class.java]
         _mActivity = activity as MainActivity
 
         return binding.root
@@ -57,14 +50,14 @@ class FolderFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val name = folderViewModel.folderName.value.toString()
         val actionType = folderViewModel.action.value.toString()
-        binding.folderName.setText(name)
         when (actionType) {
             "create" -> {
                 _mActivity.supportActionBar?.setTitle(R.string.menu_folder_create)
             }
             "update" -> {
+                val name = folderViewModel.model.value!!.content.name
+                binding.folderName.setText(name)
                 _mActivity.supportActionBar?.setTitle(R.string.menu_folder_update)
             }
         }
@@ -80,16 +73,15 @@ class FolderFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.check -> {
-                        val fileName: String = binding.folderName.text.toString()
-
-                        val builder: AlertDialog.Builder = AlertDialog.Builder(context!!)
-                        if (fileName.isEmpty()) {
-                            builder.setMessage(R.string.dialog_folder_create).setTitle(R.string.dialog_title)
-                            builder.create().show()
-                            return false
+                        if (actionType == "create") {
+                            if(!createFolder()){
+                                return false
+                            }
+                        } else {
+                            if(!updateFolder()){
+                                return false
+                            }
                         }
-                        if (actionType == "create") { createFolder(fileName, context!!) }
-                        else { updateFolder(fileName, context!!) }
                         _mActivity.goBack()
                         true
                     }
@@ -99,78 +91,57 @@ class FolderFragment : Fragment() {
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-    // 폴더 생성
-    private fun createFolder(name: String, context: Context) {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-        val dialog: AlertDialog
-        try {
-            val data = mainActivityViewModel.fileTreeJson.value!!
-            val jsonArray = JSONArray()
-            val newObject = JSONObject()
-            newObject.put("type", "folder")
-            newObject.put("name", name)
-            newObject.put("children", jsonArray)
-
-            if (folderViewModel.node.value!!.isRoot){
-                // MainViewModel 수정
-                mainViewModel.nodes.add(Node(Data.Directory(name)))
-
-                // MainActivityViewModel 수정
-                data.getJSONArray("data").put(newObject)
-                mainActivityViewModel.setFileTreeJson(data)
-            } else {
-                // MainViewModel 수정
-                val pathNodeList = fileTreeCommon.getTargetTree(folderViewModel.node.value!!)
-                fileTreeCommon.addNewNode(mainViewModel.nodes, pathNodeList, 0, Node(Data.Directory(name)))
-
-                // MainActivityViewModel 수정
-                val nameList = fileTreeCommon.getTargetJson(folderViewModel.node.value!!)
-                fileTreeCommon.createJsonObject(data.getJSONArray("data"), nameList, 0, newObject)
-            }
-
-            // json 파일 수정
-            val fileTree = File(_mActivity.filesDir.absolutePath, "file_tree.json")
-            fileTree.writeText(data.toString())
-        } catch(e: Exception) {
-            builder.setMessage(R.string.dialog_folder_create_error)
-                .setTitle(R.string.dialog_error_title)
-            dialog = builder.create()
-            dialog.show()
+    private fun createFolder(): Boolean{
+        val name: String = binding.folderName.text.toString()
+        val builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
+        if (name.isEmpty()) {
+            builder.setMessage(R.string.dialog_folder_create).setTitle(R.string.dialog_title)
+            builder.create().show()
+            return false
         }
+
+        val dbHelper = DBHelper(_mActivity)
+        if (folderViewModel.model.value == null) {
+            val main = dbHelper.insertMainFolder(name)
+            mainViewModel.modelList.value!!.add(main)
+        } else {
+            val mainId = folderViewModel.model.value!!.content.id
+            val sub = dbHelper.insertSubFolder(name, mainId)
+            val pathList = folderTreeCommon.getTargetTree(folderViewModel.model.value!!)
+            folderTreeCommon.addNewModel(mainViewModel.modelList.value!!, pathList, 0, sub)
+        }
+        dbHelper.close()
+        return true
     }
 
-    // 폴더 이름 수정
-    private fun updateFolder(newFolderName: String, context: Context){
-        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-        val dialog: AlertDialog
-
-        try {
-            val data = mainActivityViewModel.fileTreeJson.value!!
-
-            // MainViewModel 수정
-            val pathNodeList = fileTreeCommon.getTargetTree(folderViewModel.node.value!!)
-            fileTreeCommon.updateNode(mainViewModel.nodes, pathNodeList, 0, newFolderName)
-
-            // MainActivityViewModel 수정
-            if (folderViewModel.node.value!!.isRoot){
-                fileTreeCommon.findJsonObjectByName(data.getJSONArray("data"), newFolderName).put("name", newFolderName)
-                mainActivityViewModel.setFileTreeJson(data)
-            } else {
-                val nameList = fileTreeCommon.getTargetJson(folderViewModel.node.value!!)
-                fileTreeCommon.updateJsonObject(data.getJSONArray("data"), nameList, 0, newFolderName)
-            }
-
-            // json 파일 수정
-            val fileTree = File(_mActivity.filesDir.absolutePath, "file_tree.json")
-            fileTree.writeText(data.toString())
-        } catch(e: Exception) {
-            builder.setMessage(R.string.dialog_folder_update_error)
-                .setTitle(R.string.dialog_error_title)
-            dialog = builder.create()
-            dialog.show()
+    private fun updateFolder(): Boolean{
+        val name: String = binding.folderName.text.toString()
+        val builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
+        if (name.isEmpty()) {
+            builder.setMessage(R.string.dialog_folder_create).setTitle(R.string.dialog_title)
+            builder.create().show()
+            return false
         }
-    }
 
+        val dbHelper = DBHelper(_mActivity)
+        val model = folderViewModel.model.value!!
+        when(folderViewModel.model.value!!.content){
+            is Item.MainFolder -> {
+                dbHelper.updateMainFolder(model, name)
+            }
+            is Item.SubFolder -> {
+                dbHelper.updateSubFolder(model, name)
+            }
+            else -> {
+                dbHelper.close()
+                throw Exception("update folder error [update target not exist or not folder]")
+            }
+        }
+        val pathList = folderTreeCommon.getTargetTree(model)
+        folderTreeCommon.updateModel(mainViewModel.modelList.value!!, pathList, 0, name)
+        dbHelper.close()
+        return true
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

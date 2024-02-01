@@ -1,4 +1,4 @@
-package com.example.memorizationapp.common.fileHellper
+package com.example.memorizationapp.common.treeRecyclerView
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
@@ -9,9 +9,9 @@ abstract class TreeViewHolder<T>(itemView: View) : RecyclerView.ViewHolder(itemV
 
     protected open val padding = DEFAULT_PADDING
 
-    abstract fun bind(data: Node<T>)
+    abstract fun bind(data: Model<T>)
 
-    open fun setPaddingStart(data: Node<T>): Int = with(itemView) {
+    open fun setPaddingStart(data: Model<T>): Int = with(itemView) {
         val depth = data.depth
         itemView.setPadding(padding * depth, paddingTop, paddingRight, paddingBottom)
         return padding * depth

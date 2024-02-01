@@ -3,21 +3,16 @@ package com.example.memorizationapp.ui.file
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.memorizationapp.common.fileHellper.Node
-import com.example.memorizationapp.model.Data
+import com.example.memorizationapp.common.treeRecyclerView.Item
+import com.example.memorizationapp.common.treeRecyclerView.Model
 
 class FileViewModel : ViewModel() {
     private val _action = MutableLiveData<String>()
-    private val _fileName = MutableLiveData<String>()
-    private val _node = MutableLiveData<Node<Data>>()
-
+    private val _model = MutableLiveData<Model<Item>?>()
+    val model: LiveData<Model<Item>?> = _model
     val action: LiveData<String> = _action
-    val fileName: LiveData<String> = _fileName
-    val node: LiveData<Node<Data>> = _node
-
-    fun setValues(action : String, fileName : String, node: Node<Data> = Node(Data.File("Null"))) {
+    fun setValue(model : Model<Item>?, action: String) {
+        _model.value = model
         _action.value = action
-        _fileName.value = fileName
-        _node.value = node
     }
 }

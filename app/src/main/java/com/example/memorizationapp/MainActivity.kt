@@ -11,32 +11,24 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
-import com.example.memorizationapp.common.database.DBHelper
 import com.example.memorizationapp.databinding.ActivityMainBinding
-import com.example.memorizationapp.ui.MainActivityViewModel
+import com.example.memorizationapp.ui.cardList.CardListViewModel
 import com.example.memorizationapp.ui.file.FileViewModel
 import com.example.memorizationapp.ui.folder.FolderViewModel
 import com.example.memorizationapp.ui.main.MainViewModel
-import org.json.JSONArray
-import org.json.JSONObject
-import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel : MainViewModel by viewModels()
     private val folderViewModel : FolderViewModel by viewModels()
     private val fileViewModel : FileViewModel by viewModels()
-    private val mainActivityViewModel : MainActivityViewModel by viewModels()
-
-    //private val dbHelper = DBHelper(this)
+    private val cardListViewModel : CardListViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        getFileTreeJson()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -50,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_main, R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow
+                R.id.nav_main
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -77,6 +69,9 @@ class MainActivity : AppCompatActivity() {
             R.id.nav_file -> {
                 navController.navigate(R.id.nav_file)
             }
+            R.id.nav_card_list -> {
+                navController.navigate(R.id.nav_card_list)
+            }
         }
     }
 
@@ -85,23 +80,8 @@ class MainActivity : AppCompatActivity() {
         navController.popBackStack()
     }
 
-    private fun getFileTreeJson() {
-        val fileTree = File(this.filesDir.absolutePath, "file_tree.json")
-        if (fileTree.exists()) {
-            val jsonContent = fileTree.readText()
-            mainActivityViewModel.setFileTreeJson(JSONObject(jsonContent))
-        } else {
-            val jsonObject = JSONObject()
-            val jsonArray = JSONArray()
-            jsonObject.put("data", jsonArray)
-            fileTree.writeText(jsonObject.toString())
-            mainActivityViewModel.setFileTreeJson(jsonObject)
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        //dbHelper.close()
     }
 
 }
