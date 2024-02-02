@@ -27,5 +27,11 @@
         android:id="@+id/nav_card_list"
         android:name="com.example.memorizationapp.ui.cardList.CardListFragment"
         android:label="@string/menu_card_list"
-        tools:layout="@layout/fragment_file" />
+        tools:layout="@layout/fragment_card_list" />
+
+    <fragment
+        android:id="@+id/nav_card"
+        android:name="com.example.memorizationapp.ui.card.CardFragment"
+        android:label="@string/menu_card_management"
+        tools:layout="@layout/fragment_card" />
 </navigation>

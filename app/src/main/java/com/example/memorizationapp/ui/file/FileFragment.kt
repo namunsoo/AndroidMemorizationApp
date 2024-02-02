@@ -1,5 +1,6 @@
 package com.example.memorizationapp.ui.file
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -8,6 +9,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -91,12 +93,7 @@ class FileFragment : Fragment() {
     }
     private fun createFile(): Boolean{
         val name: String = binding.fileName.text.toString()
-        val builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
-        if (name.isEmpty()) {
-            builder.setMessage(R.string.dialog_file_create).setTitle(R.string.dialog_title)
-            builder.create().show()
-            return false
-        }
+        if (!valueCheck()) return false
 
         val dbHelper = DBHelper(_mActivity)
         val cardBundle: Model<Item>
@@ -127,12 +124,8 @@ class FileFragment : Fragment() {
     }
     private fun updateFile(): Boolean{
         val name: String = binding.fileName.text.toString()
-        val builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
-        if (name.isEmpty()) {
-            builder.setMessage(R.string.dialog_file_create).setTitle(R.string.dialog_title)
-            builder.create().show()
-            return false
-        }
+        if (!valueCheck()) return false
+
         val dbHelper = DBHelper(_mActivity)
         dbHelper.updateCardBundle(fileViewModel.model.value!!, name)
         val pathList = folderTreeCommon.getTargetTree(fileViewModel.model.value!!)
@@ -140,6 +133,21 @@ class FileFragment : Fragment() {
         dbHelper.close()
         return true
     }
+
+    private fun valueCheck(): Boolean {
+        val name: String = binding.fileName.text.toString()
+        val builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
+        if (name.isEmpty()) {
+            builder.setMessage(R.string.dialog_file_create).setTitle(R.string.dialog_title)
+            builder.create().show()
+            binding.fileName.requestFocus()
+            val imm = _mActivity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+            imm!!.showSoftInput(binding.fileName, 0)
+            return false
+        }
+        return true
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

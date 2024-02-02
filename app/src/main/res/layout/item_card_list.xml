@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="10dp"
@@ -13,7 +14,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        tools:ignore="UselessParent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -22,13 +26,30 @@
             android:padding="1dp"
             android:background="@color/basics_base_level4">
 
-            <TextView
-                android:id="@+id/card_question"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/text_padding"
-                android:background="@color/basics_base_level2"
-                android:textAppearance="?attr/textAppearanceListItem" />
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/card_question"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/text_padding"
+                    android:background="@color/basics_base_level2"
+                    android:textAppearance="?attr/textAppearanceListItem" />
+
+                <ImageButton
+                    android:id="@+id/btn_card_setting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/basics_base_level3"
+                    android:src="@drawable/ic_setting_card"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="5dp"
+                    android:visibility="gone"
+                    android:contentDescription="@string/common_image_error"/>
+            </FrameLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -46,4 +67,4 @@
                 android:textAppearance="?attr/textAppearanceListItem" />
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

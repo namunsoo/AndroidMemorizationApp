@@ -30,8 +30,7 @@
             android:layout_marginStart="@dimen/tv_basics_margin"
             android:text="@string/common_file_name"
             android:textSize="@dimen/tv_basics_textSize"
-            android:textStyle="bold"
-            tools:ignore="HardcodedText" />
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/fileName"
@@ -42,7 +41,6 @@
             android:hint="@string/dialog_file_create"
             android:inputType="textPersonName"
             android:textSize="@dimen/et_basics_textSize"
-            tools:ignore="HardcodedText"
             android:importantForAutofill="no" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

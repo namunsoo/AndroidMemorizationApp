@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.example.memorizationapp.common.treeRecyclerView.Item
 import com.example.memorizationapp.common.treeRecyclerView.Model
+import com.example.memorizationapp.ui.cardList.CardItem
 
 class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -63,7 +64,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 subId = subCursor.getInt(subCursor.getColumnIndex(DB.SUB_FOLDER.COLUMN_ID) as Int)
                 subName = subCursor.getString(subCursor.getColumnIndex(DB.SUB_FOLDER.COLUMN_NAME) as Int)
                 sub = Model(Item.SubFolder(subId, subName, mainId))
-                cardBundleCursor = getCardBundle(mainId, subId, db)
+                cardBundleCursor = getCardBundleCursor(mainId, subId, db)
                 while (cardBundleCursor.moveToNext()) {
                     cardId = cardBundleCursor.getInt(cardBundleCursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_ID) as Int)
                     cardName = cardBundleCursor.getString(cardBundleCursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_NAME) as Int)
@@ -72,7 +73,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 }
                 main.addChild(sub)
             }
-            cardBundleCursor = getCardBundle(mainId, null, db)
+            cardBundleCursor = getCardBundleCursor(mainId, null, db)
             while (cardBundleCursor.moveToNext()) {
                 cardId = cardBundleCursor.getInt(cardBundleCursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_ID) as Int)
                 cardName = cardBundleCursor.getString(cardBundleCursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_NAME) as Int)
@@ -81,7 +82,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             }
             result.add(main)
         }
-        cardBundleCursor = getCardBundle(null, null, db)
+        cardBundleCursor = getCardBundleCursor(null, null, db)
         while (cardBundleCursor.moveToNext()) {
             cardId = cardBundleCursor.getInt(cardBundleCursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_ID) as Int)
             cardName = cardBundleCursor.getString(cardBundleCursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_NAME) as Int)
@@ -92,7 +93,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         return result
     }
 
-    fun getCardBundle(mainId: Int?, subId: Int?, db: SQLiteDatabase): Cursor {
+    private fun getCardBundleCursor(mainId: Int?, subId: Int?, db: SQLiteDatabase): Cursor {
         var selection: String? = null
         var selectionArgs: Array<String?>? = null
         if (mainId != null && subId != null){
@@ -264,6 +265,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             "${DB.CARD_BUNDLE.COLUMN_MAIN_ID} = ?",
             arrayOf(id.toString()))
         dbWrite.close()
+        dbRead.close()
     }
 
     fun deleteCardBundleWithSubFolderId(id: Int){
@@ -287,6 +289,51 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             "${DB.CARD_BUNDLE.COLUMN_SUB_ID} = ?",
             arrayOf(id.toString()))
         dbWrite.close()
+        dbRead.close()
+    }
+
+    fun readCard(id: Int, startRow: Int, howMany: Int): List<CardItem>{
+        val dbRead = this.readableDatabase
+        val cursor = dbRead.query(
+            "${DB.CARD.TABLE_NAME}${id}", null, null, null, null, null, "${DB.CARD.COLUMN_ID} DESC", "$startRow, $howMany"
+        )
+        var id: Int
+        var cardBundleId: Int
+        var question: String
+        var answer: String
+        var memorized: Int
+        var item: CardItem
+        var cardList: MutableList<CardItem> = mutableListOf()
+        while (cursor.moveToNext()) {
+            id = cursor.getInt(cursor.getColumnIndex(DB.CARD.COLUMN_ID) as Int)
+            cardBundleId = cursor.getInt(cursor.getColumnIndex(DB.CARD.CARD_BUNDLE_ID) as Int)
+            question = cursor.getString(cursor.getColumnIndex(DB.CARD.COLUMN_QUESTION) as Int)
+            answer = cursor.getString(cursor.getColumnIndex(DB.CARD.COLUMN_ANSWER) as Int)
+            memorized = cursor.getInt(cursor.getColumnIndex(DB.CARD.COLUMN_MEMORIZED) as Int)
+            item = CardItem(id, cardBundleId, question, answer, memorized)
+            cardList.add(item)
+        }
+        dbRead.close()
+        return cardList.toList()
+    }
+    fun insertCard(cardBundleId: Int, question: String, answer: String, memorized: Int): CardItem {
+        val dbWrite = this.writableDatabase
+        val dbRead = this.readableDatabase
+        val contentValues = ContentValues()
+        contentValues.put(DB.CARD.CARD_BUNDLE_ID, cardBundleId)
+        contentValues.put(DB.CARD.COLUMN_QUESTION, question)
+        contentValues.put(DB.CARD.COLUMN_ANSWER, answer)
+        contentValues.put(DB.CARD.COLUMN_MEMORIZED, memorized)
+        dbWrite.insert("${DB.CARD.TABLE_NAME}${cardBundleId}", null, contentValues)
+        val cursor = dbRead.rawQuery(
+            "SELECT * FROM ${DB.MAIN_FOLDER.TABLE_NAME}",null
+        )
+        cursor.moveToLast()
+        val cardId = cursor.getInt(cursor.getColumnIndex(DB.CARD.COLUMN_ID) as Int)
+        val cardItem = CardItem(cardId, cardBundleId, question, answer, memorized)
+        dbRead.close()
+        dbWrite.close()
+        return cardItem
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {

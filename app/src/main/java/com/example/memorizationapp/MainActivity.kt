@@ -12,6 +12,7 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.example.memorizationapp.databinding.ActivityMainBinding
+import com.example.memorizationapp.ui.card.CardViewModel
 import com.example.memorizationapp.ui.cardList.CardListViewModel
 import com.example.memorizationapp.ui.file.FileViewModel
 import com.example.memorizationapp.ui.folder.FolderViewModel
@@ -26,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private val folderViewModel : FolderViewModel by viewModels()
     private val fileViewModel : FileViewModel by viewModels()
     private val cardListViewModel : CardListViewModel by viewModels()
+    private val cardViewModel : CardViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +73,9 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.nav_card_list -> {
                 navController.navigate(R.id.nav_card_list)
+            }
+            R.id.nav_card -> {
+                navController.navigate(R.id.nav_card)
             }
         }
     }

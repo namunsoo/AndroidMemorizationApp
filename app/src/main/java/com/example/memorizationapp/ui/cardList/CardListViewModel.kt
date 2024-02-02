@@ -7,11 +7,11 @@ import com.example.memorizationapp.common.treeRecyclerView.Item
 import com.example.memorizationapp.common.treeRecyclerView.Model
 
 class CardListViewModel: ViewModel() {
-    private val _cardBundleId = MutableLiveData<Int?>()
-    private val _cardList = MutableLiveData<MutableList<String>?>()
-    val cardBundleId: LiveData<Int?> = _cardBundleId
-    val cardList: LiveData<MutableList<String>?> = _cardList
-    fun setValue(id : Int?, cardList: MutableList<String>) {
+    private val _cardBundleId = MutableLiveData<Int>()
+    private val _cardList = MutableLiveData<MutableList<CardItem>>()
+    val cardBundleId: LiveData<Int> = _cardBundleId
+    val cardList: LiveData<MutableList<CardItem>> = _cardList
+    fun setValue(id : Int, cardList: MutableList<CardItem>) {
         _cardBundleId.value = id
         _cardList.value = cardList
     }

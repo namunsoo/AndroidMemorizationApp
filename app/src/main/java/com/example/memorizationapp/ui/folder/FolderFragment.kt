@@ -1,5 +1,6 @@
 package com.example.memorizationapp.ui.folder
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -7,6 +8,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -20,6 +22,7 @@ import com.example.memorizationapp.common.treeRecyclerView.FolderTreeCommon
 import com.example.memorizationapp.common.treeRecyclerView.Item
 import com.example.memorizationapp.databinding.FragmentFolderBinding
 import com.example.memorizationapp.ui.main.MainViewModel
+
 
 class FolderFragment : Fragment() {
 
@@ -52,10 +55,10 @@ class FolderFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val actionType = folderViewModel.action.value.toString()
         when (actionType) {
-            "create" -> {
+            CREATE -> {
                 _mActivity.supportActionBar?.setTitle(R.string.menu_folder_create)
             }
-            "update" -> {
+            UPDATE -> {
                 val name = folderViewModel.model.value!!.content.name
                 binding.folderName.setText(name)
                 _mActivity.supportActionBar?.setTitle(R.string.menu_folder_update)
@@ -73,7 +76,7 @@ class FolderFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.check -> {
-                        if (actionType == "create") {
+                        if (actionType == CREATE) {
                             if(!createFolder()){
                                 return false
                             }
@@ -93,12 +96,7 @@ class FolderFragment : Fragment() {
 
     private fun createFolder(): Boolean{
         val name: String = binding.folderName.text.toString()
-        val builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
-        if (name.isEmpty()) {
-            builder.setMessage(R.string.dialog_folder_create).setTitle(R.string.dialog_title)
-            builder.create().show()
-            return false
-        }
+        if (!valueCheck()) return false
 
         val dbHelper = DBHelper(_mActivity)
         if (folderViewModel.model.value == null) {
@@ -116,12 +114,7 @@ class FolderFragment : Fragment() {
 
     private fun updateFolder(): Boolean{
         val name: String = binding.folderName.text.toString()
-        val builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
-        if (name.isEmpty()) {
-            builder.setMessage(R.string.dialog_folder_create).setTitle(R.string.dialog_title)
-            builder.create().show()
-            return false
-        }
+        if (!valueCheck()) return false
 
         val dbHelper = DBHelper(_mActivity)
         val model = folderViewModel.model.value!!
@@ -142,9 +135,29 @@ class FolderFragment : Fragment() {
         dbHelper.close()
         return true
     }
+
+    private fun valueCheck(): Boolean {
+        val name: String = binding.folderName.text.toString()
+        val builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
+        if (name.isEmpty()) {
+            builder.setMessage(R.string.dialog_folder_create).setTitle(R.string.dialog_title)
+            builder.create().show()
+            binding.folderName.requestFocus()
+            val imm = _mActivity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+            imm!!.showSoftInput(binding.folderName, 0)
+            return false
+        }
+        return true
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        private const val CREATE = "create"
+        private const val UPDATE = "update"
     }
 
 }

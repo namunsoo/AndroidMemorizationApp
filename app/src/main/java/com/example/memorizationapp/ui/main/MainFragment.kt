@@ -70,9 +70,6 @@ class MainFragment : Fragment() {
         mainViewModel.modelList.observe(_mActivity, Observer {
             getFolderTree()
         })
-//        val dbHelper = DBHelper(_mActivity)
-//        dbHelper.close()
-//        getFolderTree()
     }
 
     private fun getFolderTree() {
