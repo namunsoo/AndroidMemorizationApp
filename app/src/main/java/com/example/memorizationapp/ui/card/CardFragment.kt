@@ -21,8 +21,8 @@ import com.example.memorizationapp.MainActivity
 import com.example.memorizationapp.R
 import com.example.memorizationapp.common.database.DBHelper
 import com.example.memorizationapp.databinding.FragmentCardBinding
+import com.example.memorizationapp.ui.cardList.CardItem
 import com.example.memorizationapp.ui.cardList.CardListViewModel
-import com.example.memorizationapp.ui.folder.FolderFragment
 
 class CardFragment : Fragment() {
 
@@ -69,7 +69,7 @@ class CardFragment : Fragment() {
             // menu 클릭 이벤트 설정
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
-                    R.id.check -> {
+                    R.id.action_check -> {
                         if (actionType == CREATE) {
                             if(!createCard()){
                                 return false
@@ -78,7 +78,10 @@ class CardFragment : Fragment() {
                                 binding.cardAnswer.setText("")
                             }
                         } else {
-
+                            if (!updateCard()) {
+                                return false
+                            }
+                            _mActivity.goBack()
                         }
                         true
                     }
@@ -91,19 +94,23 @@ class CardFragment : Fragment() {
     private fun createCard(): Boolean {
         if (!valueCheck()) return false
         val dbHelper = DBHelper(_mActivity)
-        val cardItem = dbHelper.insertCard(
+        dbHelper.insertCard(
             cardViewModel.cardBundleId.value!!,
             binding.cardQuestion.text.toString(),
             binding.cardAnswer.text.toString(),
             0
         )
+        val itemsPerBinding = 10
+        val startRow = (cardViewModel.cardListRow.value!! / itemsPerBinding) * itemsPerBinding
+        cardListViewModel.setValue(
+            cardListViewModel.cardBundleId.value!!,
+            dbHelper.readCard(cardListViewModel.cardBundleId.value!!, startRow, itemsPerBinding).toMutableList())
         dbHelper.close()
         val builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
         builder.setMessage(R.string.dialog_card_insert_complete)
         val dialog = builder.create()
         dialog.window?.setBackgroundDrawable(ColorDrawable(resources.getColor(R.color.basics_base_level2)))
         dialog.show()
-        cardListViewModel.cardList.value!!.add(0, cardItem)
         val dismissHandler = Handler()
         dismissHandler.postDelayed({
             if (dialog.isShowing) {
@@ -113,6 +120,26 @@ class CardFragment : Fragment() {
         return true
     }
 
+    private fun updateCard(): Boolean {
+        if (!valueCheck()) return false
+        val dbHelper = DBHelper(_mActivity)
+        dbHelper.updateCard(
+            cardViewModel.cardId.value!!,
+            cardViewModel.cardBundleId.value!!,
+            binding.cardQuestion.text.toString(),
+            binding.cardAnswer.text.toString()
+        )
+        dbHelper.close()
+        cardListViewModel.setUpdate(CardItem(
+            cardViewModel.cardListRow.value!!,
+            cardViewModel.cardId.value!!,
+            cardViewModel.cardBundleId.value!!,
+            binding.cardQuestion.text.toString(),
+            binding.cardAnswer.text.toString(),
+            cardViewModel.cardMemorized.value!!
+        ))
+        return true
+    }
     private fun valueCheck(): Boolean {
         val question: String = binding.cardQuestion.text.toString()
         val answer: String = binding.cardAnswer.text.toString()

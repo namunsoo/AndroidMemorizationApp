@@ -39,15 +39,42 @@
                     android:textAppearance="?attr/textAppearanceListItem" />
 
                 <ImageButton
+                    android:id="@+id/btn_card_update"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:padding="3dp"
+                    android:background="#00000000"
+                    android:src="@drawable/ic_update"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="85dp"
+                    android:visibility="gone"
+                    android:contentDescription="@string/common_image_error"/>
+
+                <ImageButton
+                    android:id="@+id/btn_card_delete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#00000000"
+                    android:src="@drawable/ic_delete"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="45dp"
+                    android:visibility="gone"
+                    android:contentDescription="@string/common_image_error"/>
+
+                <ImageButton
                     android:id="@+id/btn_card_setting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@color/basics_base_level3"
-                    android:src="@drawable/ic_setting_card"
+                    android:background="#00000000"
+                    android:src="@drawable/ic_setting"
                     android:layout_gravity="top|end"
                     android:layout_marginTop="5dp"
                     android:layout_marginRight="5dp"
-                    android:visibility="gone"
+                    android:visibility="visible"
                     android:contentDescription="@string/common_image_error"/>
             </FrameLayout>
         </LinearLayout>

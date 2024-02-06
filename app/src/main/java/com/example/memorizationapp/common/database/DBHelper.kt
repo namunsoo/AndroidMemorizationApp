@@ -292,11 +292,12 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         dbRead.close()
     }
 
-    fun readCard(id: Int, startRow: Int, howMany: Int): List<CardItem>{
+    fun readCard(id: Int, startRow: Int, howMany: Int): MutableList<CardItem> {
         val dbRead = this.readableDatabase
         val cursor = dbRead.query(
             "${DB.CARD.TABLE_NAME}${id}", null, null, null, null, null, "${DB.CARD.COLUMN_ID} DESC", "$startRow, $howMany"
         )
+        var count = 0
         var id: Int
         var cardBundleId: Int
         var question: String
@@ -310,30 +311,42 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             question = cursor.getString(cursor.getColumnIndex(DB.CARD.COLUMN_QUESTION) as Int)
             answer = cursor.getString(cursor.getColumnIndex(DB.CARD.COLUMN_ANSWER) as Int)
             memorized = cursor.getInt(cursor.getColumnIndex(DB.CARD.COLUMN_MEMORIZED) as Int)
-            item = CardItem(id, cardBundleId, question, answer, memorized)
+            item = CardItem(startRow + count, id, cardBundleId, question, answer, memorized)
             cardList.add(item)
+            count += 1
         }
         dbRead.close()
-        return cardList.toList()
+        return cardList
     }
-    fun insertCard(cardBundleId: Int, question: String, answer: String, memorized: Int): CardItem {
+    fun insertCard(cardBundleId: Int, question: String, answer: String, memorized: Int) {
         val dbWrite = this.writableDatabase
-        val dbRead = this.readableDatabase
         val contentValues = ContentValues()
         contentValues.put(DB.CARD.CARD_BUNDLE_ID, cardBundleId)
         contentValues.put(DB.CARD.COLUMN_QUESTION, question)
         contentValues.put(DB.CARD.COLUMN_ANSWER, answer)
         contentValues.put(DB.CARD.COLUMN_MEMORIZED, memorized)
         dbWrite.insert("${DB.CARD.TABLE_NAME}${cardBundleId}", null, contentValues)
-        val cursor = dbRead.rawQuery(
-            "SELECT * FROM ${DB.MAIN_FOLDER.TABLE_NAME}",null
-        )
-        cursor.moveToLast()
-        val cardId = cursor.getInt(cursor.getColumnIndex(DB.CARD.COLUMN_ID) as Int)
-        val cardItem = CardItem(cardId, cardBundleId, question, answer, memorized)
-        dbRead.close()
         dbWrite.close()
-        return cardItem
+    }
+
+    fun updateCard(id: Int, cardBundleId: Int, question: String, answer: String) {
+        val dbWrite = this.writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put(DB.CARD.COLUMN_QUESTION, question)
+        contentValues.put(DB.CARD.COLUMN_ANSWER, answer)
+        dbWrite.update("${DB.CARD.TABLE_NAME}${cardBundleId}",
+            contentValues,
+            "${DB.CARD.COLUMN_ID} = ?",
+            arrayOf(id.toString()))
+        dbWrite.close()
+    }
+
+    fun deleteCard(id: Int, cardBundleId: Int) {
+        val dbWrite = this.writableDatabase
+        dbWrite.delete("${DB.CARD.TABLE_NAME}${cardBundleId}",
+            "${DB.CARD.COLUMN_ID} = ?",
+            arrayOf(id.toString()))
+        dbWrite.close()
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {

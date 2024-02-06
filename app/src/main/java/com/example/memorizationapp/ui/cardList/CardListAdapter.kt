@@ -1,23 +1,31 @@
 package com.example.memorizationapp.ui.cardList
 
-import android.opengl.Visibility
+import android.app.AlertDialog
+import android.os.Handler
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
+import android.view.animation.AlphaAnimation
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.ViewModelProvider
+import com.example.memorizationapp.MainActivity
 import com.example.memorizationapp.R
+import com.example.memorizationapp.common.database.DBHelper
 
 import com.example.memorizationapp.databinding.ItemCardListBinding
+import com.example.memorizationapp.ui.card.CardViewModel
 
 class CardListAdapter(
-    private val cards: List<CardItem>
+    private val _mActivity: MainActivity,
+    private val cards: MutableList<CardItem>
 ) : RecyclerView.Adapter<CardListAdapter.CardViewHolder>() {
 
+    private lateinit var cardViewModel: CardViewModel
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
+
+        cardViewModel = ViewModelProvider(_mActivity)[CardViewModel::class.java]
 
         return CardViewHolder(
             ItemCardListBinding.inflate(
@@ -34,28 +42,88 @@ class CardListAdapter(
         position: Int,
         payloads: MutableList<Any>
     ) {
-        holder.itemView.setOnSingleClickListener {
-            val button = it.findViewById(R.id.btn_card_setting) as ImageButton
-            if (button.visibility == View.VISIBLE) {
-                button.visibility = View.GONE
+//        holder.itemView.setOnSingleClickListener {
+//        }
+        val buttonSetting = holder.itemView.findViewById<ImageButton>(R.id.btn_card_setting)
+        val buttonUpdate = holder.itemView.findViewById<ImageButton>(R.id.btn_card_update)
+        val buttonDelete = holder.itemView.findViewById<ImageButton>(R.id.btn_card_delete)
+        buttonSetting.setOnClickListener {
+            if (buttonUpdate.visibility == View.VISIBLE && buttonDelete.visibility == View.VISIBLE) {
+                val fadeOut = AlphaAnimation(1f, 0f)
+                fadeOut.duration = 400
+                buttonUpdate.startAnimation(fadeOut)
+                buttonUpdate.visibility = View.GONE
+                Handler().postDelayed({
+                    buttonDelete.startAnimation(fadeOut)
+                    buttonDelete.visibility = View.GONE
+                }, 500)
+
             } else {
-                button.visibility = View.VISIBLE
+                val fadeIn = AlphaAnimation(0f, 1f)
+                fadeIn.duration = 400
+                buttonDelete.visibility = View.VISIBLE
+                buttonDelete.startAnimation(fadeIn)
+                Handler().postDelayed({
+                    buttonUpdate.visibility = View.VISIBLE
+                    buttonUpdate.startAnimation(fadeIn)
+                }, 500)
             }
         }
 
+        val data = cards[position]
+        buttonUpdate.setOnClickListener {
+            cardViewModel.setValue(data.row, data.id, data.cardBundleId, data.question, data.answer, data.memorized, UPDATE)
+            _mActivity.changeFragment(R.id.nav_card)
+        }
+        buttonDelete.setOnClickListener {
+            val alertDialogBuilder = AlertDialog.Builder(_mActivity)
+            alertDialogBuilder.setTitle(R.string.dialog_title).setMessage(R.string.dialog_card_delete)
+
+            alertDialogBuilder.setPositiveButton(R.string.common_confirm) { dialog, _ ->
+                val dbHelper = DBHelper(_mActivity)
+                dbHelper.deleteCard(data.id, data.cardBundleId)
+                dbHelper.close()
+                cards.removeAt(position)
+                notifyItemRangeRemoved(position, 1)
+                dialog.dismiss()
+            }
+
+            alertDialogBuilder.setNegativeButton(R.string.common_cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+
+            val alertDialog: AlertDialog = alertDialogBuilder.create()
+            alertDialog.show()
+        }
         super.onBindViewHolder(holder, position, payloads)
     }
 
-    private fun View.setOnSingleClickListener(onSingleClick: (View) -> Unit) {
-        var lastClickTime = System.currentTimeMillis()
+//    private fun View.setOnSingleClickListener(onSingleClick: (View) -> Unit) {
+//        var lastClickTime = System.currentTimeMillis()
+//
+//        setOnClickListener {
+//            if (System.currentTimeMillis() - lastClickTime < 500) return@setOnClickListener
+//
+//            lastClickTime = System.currentTimeMillis()
+//
+//            onSingleClick(this)
+//        }
+//    }
 
-        setOnClickListener {
-            if (System.currentTimeMillis() - lastClickTime < 500) return@setOnClickListener
-
-            lastClickTime = System.currentTimeMillis()
-
-            onSingleClick(this)
+    fun addItems(items: List<CardItem>) {
+        items.forEach {cardItem ->
+            cards.add(cardItem)
         }
+        notifyItemRangeInserted(cards.size, items.size)
+    }
+
+    fun getCards(): MutableList<CardItem> {
+        return cards
+    }
+
+    fun updateItem(item: CardItem) {
+        cards[item.row] = item
+        notifyItemChanged(item.row, item)
     }
 
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
@@ -70,6 +138,11 @@ class CardListAdapter(
         RecyclerView.ViewHolder(binding.root) {
         val question: TextView = binding.cardQuestion
         val answer: TextView = binding.cardAnswer
+    }
+
+    companion object {
+        private const val CREATE = "create"
+        private const val UPDATE = "update"
     }
 
 }

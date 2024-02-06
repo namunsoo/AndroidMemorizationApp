@@ -75,7 +75,7 @@ class FolderFragment : Fragment() {
             // menu 클릭 이벤트 설정
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
-                    R.id.check -> {
+                    R.id.action_check -> {
                         if (actionType == CREATE) {
                             if(!createFolder()){
                                 return false

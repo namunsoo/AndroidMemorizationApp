@@ -2,6 +2,7 @@ package com.example.memorizationapp
 
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import androidx.activity.viewModels
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -55,6 +56,17 @@ class MainActivity : AppCompatActivity() {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
         return true
+    }
+
+    override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        return when (menuItem.itemId) {
+            R.id.action_memorize_cards -> {
+                navController.navigate(R.id.nav_memorize_option)
+                true
+            }
+            else -> super.onOptionsItemSelected(menuItem)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

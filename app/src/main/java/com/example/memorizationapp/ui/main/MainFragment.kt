@@ -82,7 +82,7 @@ class MainFragment : Fragment() {
         } else {
             models = mainViewModel.modelList.value!!
         }
-        val recyclerView = binding.recyclerViewFolderList
+        val recyclerView = binding.rvFolderList
         recyclerView.adapter = FolderTreeAdapter(_mActivity, models.toList())
     }
 
