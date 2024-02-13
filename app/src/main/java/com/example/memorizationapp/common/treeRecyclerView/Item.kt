@@ -8,5 +8,5 @@ sealed class Item(
 ) {
     class MainFolder(id: Int, name: String): Item(id, name)
     class SubFolder(id: Int, name: String, main_id: Int): Item(id, name, main_id)
-    class Card(id: Int, name: String, main_id: Int?, sub_id: Int?): Item(id, name, main_id, sub_id)
+    class CardBundle(id: Int, name: String, main_id: Int?, sub_id: Int?): Item(id, name, main_id, sub_id)
 }

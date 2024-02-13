@@ -40,4 +40,10 @@
         android:name="com.example.memorizationapp.ui.memorizeOption.MemorizeOptionFragment"
         android:label="@string/menu_memorize_option"
         tools:layout="@layout/fragment_memorize_option" />
+
+    <fragment
+        android:id="@+id/nav_memorization_test"
+        android:name="com.example.memorizationapp.ui.memorizationTest.MemorizationTestFragment"
+        android:label="@string/menu_memorization_test"
+        tools:layout="@layout/fragment_memorization_test" />
 </navigation>

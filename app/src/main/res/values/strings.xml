@@ -15,6 +15,7 @@
     <string name="menu_file">카드 묶음</string>
     <string name="menu_card_management">카드 관리</string>
     <string name="menu_memorize_option">암기 설정</string>
+    <string name="menu_memorization_test">암기 테스트</string>
     <string name="menu_file_create">카드 묶음 생성</string>
     <string name="menu_file_update">카드 묶음 수정</string>
     <string name="menu_card_list">카드</string>
@@ -37,6 +38,8 @@
     <string name="dialog_card_insert_complete">카드가 추가되었습니다.</string>
 
     <string name="custom_dialog_folder_select_title">폴더 선택</string>
+    <string name="custom_dialog_card_type_select_title">카드 분류 선택</string>
+    <string name="custom_dialog_card_sequence_select_title">카드 순서 선택</string>
 
     <string name="message_create_folder">폴더 이름을 입력하세요.</string>
     <string name="message_card_question">문제를 입력하세요.</string>
@@ -44,9 +47,11 @@
 
     <string name="common_back">뒤로</string>
     <string name="common_save">저장</string>
+    <string name="common_basics">기본</string>
     <string name="common_all">전체</string>
-    <string name="common_random">랜덤</string>
+    <string name="common_random">무작위</string>
     <string name="common_memorizing">암기중</string>
+    <string name="common_memorized">암기 완료</string>
     <string name="common_memorize_cards">카드 암기</string>
     <string name="common_test_start">테스트 시작</string>
     <string name="common_confirm">확인</string>
@@ -57,7 +62,7 @@
     <string name="common_folder_choice">폴더 선택</string>
     <string name="common_file_create">카드 생성</string>
     <string name="common_file_name">카드 이름</string>
-    <string name="common_card_list">카드 목록</string>
+    <string name="common_card_type">카드 종류</string>
     <string name="common_card_sequence">카드 순서</string>
     <string name="common_update">수정</string>
     <string name="common_delete">삭제</string>

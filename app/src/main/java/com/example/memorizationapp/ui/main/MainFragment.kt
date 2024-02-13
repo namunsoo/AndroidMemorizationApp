@@ -56,13 +56,13 @@ class MainFragment : Fragment() {
         connectionHiddenPanelAnim()
 
         // 파일 생성 연결
-        binding.bntCreateFile.setOnClickListener {
+        binding.btnCreateFile.setOnClickListener {
             fileViewModel.setValue(null, "create") // item class 만 설정
             _mActivity.changeFragment(R.id.nav_file)
         }
 
         // 폴더 생성 연결
-        binding.bntCreateFolder.setOnClickListener {
+        binding.btnCreateFolder.setOnClickListener {
             folderViewModel.setValue(null, "create") // item class 만 설정
             _mActivity.changeFragment(R.id.nav_folder)
         }

@@ -72,7 +72,7 @@
                 </View>
 
                 <Button
-                    android:id="@+id/bnt_create_file"
+                    android:id="@+id/btn_create_file"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#00000000"
@@ -86,7 +86,7 @@
                     />
 
                 <Button
-                    android:id="@+id/bnt_create_folder"
+                    android:id="@+id/btn_create_folder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="#00000000"

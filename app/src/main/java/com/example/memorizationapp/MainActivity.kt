@@ -12,12 +12,14 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.viewModels
 import com.example.memorizationapp.databinding.ActivityMainBinding
 import com.example.memorizationapp.ui.card.CardViewModel
 import com.example.memorizationapp.ui.cardList.CardListViewModel
 import com.example.memorizationapp.ui.file.FileViewModel
 import com.example.memorizationapp.ui.folder.FolderViewModel
 import com.example.memorizationapp.ui.main.MainViewModel
+import com.example.memorizationapp.ui.memorizeOption.MemorizeOptionViewModel
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     private val fileViewModel : FileViewModel by viewModels()
     private val cardListViewModel : CardListViewModel by viewModels()
     private val cardViewModel : CardViewModel by viewModels()
+    private val memorizeOptionViewModel : MemorizeOptionViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,6 +91,9 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.nav_card -> {
                 navController.navigate(R.id.nav_card)
+            }
+            R.id.nav_memorization_test -> {
+                navController.navigate(R.id.nav_memorization_test)
             }
         }
     }

@@ -66,7 +66,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/text_padding"
-                    android:text="@string/common_card_list"
+                    android:text="@string/common_card_type"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
@@ -125,6 +125,7 @@
             android:padding="10dp"
             android:orientation="vertical">
             <Button
+                android:id="@+id/btn_test_start"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/common_test_start"/>

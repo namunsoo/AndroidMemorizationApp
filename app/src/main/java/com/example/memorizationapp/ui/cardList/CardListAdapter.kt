@@ -42,8 +42,6 @@ class CardListAdapter(
         position: Int,
         payloads: MutableList<Any>
     ) {
-//        holder.itemView.setOnSingleClickListener {
-//        }
         val buttonSetting = holder.itemView.findViewById<ImageButton>(R.id.btn_card_setting)
         val buttonUpdate = holder.itemView.findViewById<ImageButton>(R.id.btn_card_update)
         val buttonDelete = holder.itemView.findViewById<ImageButton>(R.id.btn_card_delete)
@@ -83,8 +81,9 @@ class CardListAdapter(
                 val dbHelper = DBHelper(_mActivity)
                 dbHelper.deleteCard(data.id, data.cardBundleId)
                 dbHelper.close()
-                cards.removeAt(position)
-                notifyItemRangeRemoved(position, 1)
+                val index = cards.indexOfFirst { it.row == data.row }
+                cards.removeAt(index)
+                notifyItemRangeRemoved(index, 1)
                 dialog.dismiss()
             }
 
@@ -98,18 +97,6 @@ class CardListAdapter(
         super.onBindViewHolder(holder, position, payloads)
     }
 
-//    private fun View.setOnSingleClickListener(onSingleClick: (View) -> Unit) {
-//        var lastClickTime = System.currentTimeMillis()
-//
-//        setOnClickListener {
-//            if (System.currentTimeMillis() - lastClickTime < 500) return@setOnClickListener
-//
-//            lastClickTime = System.currentTimeMillis()
-//
-//            onSingleClick(this)
-//        }
-//    }
-
     fun addItems(items: List<CardItem>) {
         items.forEach {cardItem ->
             cards.add(cardItem)
@@ -117,13 +104,37 @@ class CardListAdapter(
         notifyItemRangeInserted(cards.size, items.size)
     }
 
+    fun addItemsInFront(items: List<CardItem>) {
+        val reverseItem = items.reversed()
+        reverseItem.forEach {cardItem ->
+            cards.add(0, cardItem)
+        }
+        notifyItemRangeInserted(0, items.size)
+    }
+
+    fun deleteItemsFromFront(deleteItemCount: Int) {
+        repeat(deleteItemCount) {
+            cards.removeAt(0) // Remove the first item repeatedly
+        }
+        notifyItemRangeRemoved(0, deleteItemCount)
+    }
+
+    fun deleteItemsFromLast(deleteItemCount: Int) {
+        val lastIndex = cards.size - 1
+        for (i in 0 until deleteItemCount) {
+            cards.removeAt(lastIndex - i)
+        }
+        notifyItemRangeRemoved(lastIndex - deleteItemCount, deleteItemCount)
+    }
+
     fun getCards(): MutableList<CardItem> {
         return cards
     }
 
     fun updateItem(item: CardItem) {
-        cards[item.row] = item
-        notifyItemChanged(item.row, item)
+        val index = cards.indexOfFirst { it.row == item.row }
+        cards[index] = item
+        notifyItemChanged(index, item)
     }
 
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {

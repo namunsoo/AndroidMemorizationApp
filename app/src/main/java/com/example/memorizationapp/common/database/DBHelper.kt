@@ -68,7 +68,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 while (cardBundleCursor.moveToNext()) {
                     cardId = cardBundleCursor.getInt(cardBundleCursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_ID) as Int)
                     cardName = cardBundleCursor.getString(cardBundleCursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_NAME) as Int)
-                    card = Model(Item.Card(cardId, cardName, mainId, subId))
+                    card = Model(Item.CardBundle(cardId, cardName, mainId, subId))
                     sub.addChild(card)
                 }
                 main.addChild(sub)
@@ -77,7 +77,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             while (cardBundleCursor.moveToNext()) {
                 cardId = cardBundleCursor.getInt(cardBundleCursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_ID) as Int)
                 cardName = cardBundleCursor.getString(cardBundleCursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_NAME) as Int)
-                card = Model(Item.Card(cardId, cardName, mainId, null))
+                card = Model(Item.CardBundle(cardId, cardName, mainId, null))
                 main.addChild(card)
             }
             result.add(main)
@@ -86,7 +86,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         while (cardBundleCursor.moveToNext()) {
             cardId = cardBundleCursor.getInt(cardBundleCursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_ID) as Int)
             cardName = cardBundleCursor.getString(cardBundleCursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_NAME) as Int)
-            card = Model(Item.Card(cardId, cardName, null, null))
+            card = Model(Item.CardBundle(cardId, cardName, null, null))
             result.add(card)
         }
         db.close()
@@ -218,7 +218,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         val cardBundleName = cursor.getString(cursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_NAME) as Int)
         val cardBundleMainId = cursor.getInt(cursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_MAIN_ID) as Int)
         val cardBundleSubId = cursor.getInt(cursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_SUB_ID) as Int)
-        val model: Model<Item> = Model(Item.Card(cardBundleId, cardBundleName, cardBundleMainId, cardBundleSubId))
+        val model: Model<Item> = Model(Item.CardBundle(cardBundleId, cardBundleName, cardBundleMainId, cardBundleSubId))
         dbWrite.close()
         dbRead.close()
         return model
@@ -297,7 +297,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         val cursor = dbRead.query(
             "${DB.CARD.TABLE_NAME}${id}", null, null, null, null, null, "${DB.CARD.COLUMN_ID} DESC", "$startRow, $howMany"
         )
-        var count = 0
+        var count = 1
         var id: Int
         var cardBundleId: Int
         var question: String

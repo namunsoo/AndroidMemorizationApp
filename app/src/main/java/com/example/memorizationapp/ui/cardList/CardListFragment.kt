@@ -25,6 +25,8 @@ class CardListFragment : Fragment() {
     private lateinit var _mActivity : MainActivity
 
     private val _itemsPerBinding = 10
+    private var _lastItemRow = 0
+    private var _firstItemRow = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,20 +73,57 @@ class CardListFragment : Fragment() {
                 val visibleItemCount = layoutManager.childCount
                 val totalItemCount = layoutManager.itemCount
                 val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+                val cardListAdapter = binding.rvCardList.adapter as CardListAdapter
 
+                // 스크롤 밑일때 추가
                 if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
                     val dbHelper = DBHelper(_mActivity)
                     val items = dbHelper.readCard(cardListViewModel.cardBundleId.value!!,
-                        binding.rvCardList.adapter!!.itemCount,
+                        _lastItemRow,
                         _itemsPerBinding)
                     dbHelper.close()
                     if (items.isNotEmpty()) {
-                        (binding.rvCardList.adapter as CardListAdapter).addItems(items)
+                        if (cardListAdapter.getCards().count() > 20) {
+                            cardListAdapter.deleteItemsFromFront(_itemsPerBinding)
+                        }
+                        cardListAdapter.addItems(items)
                         cardListViewModel.setValue(
                             cardListViewModel.cardBundleId.value!!,
-                            (binding.rvCardList.adapter as CardListAdapter).getCards())
+                            cardListAdapter.getCards())
+                        _lastItemRow = cardListAdapter.getCards().last().row
+                        _firstItemRow = cardListAdapter.getCards().first().row
                     }
+                }
 
+                // 스크롤 위일때 추가
+                if (firstVisibleItemPosition == 0) {
+                    val dbHelper = DBHelper(_mActivity)
+                    val items: MutableList<CardItem>
+                    if (_firstItemRow < 2 ) {
+                        items = mutableListOf()
+                    }
+                    else if (_firstItemRow - _itemsPerBinding < 0) {
+                        items = dbHelper.readCard(cardListViewModel.cardBundleId.value!!,
+                            0,
+                            _firstItemRow)
+
+                    } else {
+                        items = dbHelper.readCard(cardListViewModel.cardBundleId.value!!,
+                            _firstItemRow - _itemsPerBinding - 1,
+                            _itemsPerBinding)
+                    }
+                    dbHelper.close()
+                    if (items.isNotEmpty()) {
+                        if (cardListAdapter.getCards().count() > 20) {
+                            cardListAdapter.deleteItemsFromLast(_itemsPerBinding)
+                        }
+                        cardListAdapter.addItemsInFront(items)
+                        cardListViewModel.setValue(
+                            cardListViewModel.cardBundleId.value!!,
+                            cardListAdapter.getCards())
+                        _lastItemRow = cardListAdapter.getCards().last().row
+                        _firstItemRow = cardListAdapter.getCards().first().row
+                    }
                 }
             }
         })
@@ -94,7 +133,6 @@ class CardListFragment : Fragment() {
     private fun getCards() {
         var items: MutableList<CardItem>
         if (cardListViewModel.cardList.value!!.isEmpty()) {
-            //val startRow = (cardViewModel.cardListRow.value!! / _itemsPerBinding) * _itemsPerBinding
             val dbHelper = DBHelper(_mActivity)
             items = dbHelper.readCard(cardListViewModel.cardBundleId.value!!, 0, _itemsPerBinding)
             dbHelper.close()
@@ -102,7 +140,12 @@ class CardListFragment : Fragment() {
         } else {
             items = cardListViewModel.cardList.value!!
         }
-        binding.rvCardList.adapter = CardListAdapter(_mActivity, items)
+
+        if (items.isNotEmpty()) {
+            _lastItemRow = items.last().row
+            _firstItemRow = items.first().row
+            binding.rvCardList.adapter = CardListAdapter(_mActivity, items)
+        }
     }
 
     override fun onDestroyView() {

@@ -29,7 +29,7 @@ class FolderTreeAdapter (private val _mActivity: MainActivity, models: List<Mode
     override fun getItemViewType(position: Int): Int {
         val data = displayItems[position]
 
-        return if (data.content is Item.Card) FILE else FOLDER
+        return if (data.content is Item.CardBundle) FILE else FOLDER
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TreeViewHolder<Item> {
@@ -56,7 +56,7 @@ class FolderTreeAdapter (private val _mActivity: MainActivity, models: List<Mode
 
         val item : ConstraintLayout = (holder.itemView as ConstraintLayout).getChildAt(0) as ConstraintLayout
 
-        if (data.content is Item.Card) {
+        if (data.content is Item.CardBundle) {
             holder.itemView.setOnSingleClickListener {
                 cardListViewModel.setValue(data.content.id, mutableListOf())
                 _mActivity.changeFragment(R.id.nav_card_list)
@@ -91,7 +91,7 @@ class FolderTreeAdapter (private val _mActivity: MainActivity, models: List<Mode
         setting.setOnSingleClickListener {
             val popupMenu = PopupMenu(it.context, it)
             popupMenu.setForceShowIcon(true)
-            if (data.content is Item.Card) {
+            if (data.content is Item.CardBundle) {
                 popupMenu.menuInflater.inflate(R.menu.file_setting, popupMenu.menu)
             } else {
                 popupMenu.menuInflater.inflate(R.menu.folder_setting, popupMenu.menu)
@@ -144,7 +144,7 @@ class FolderTreeAdapter (private val _mActivity: MainActivity, models: List<Mode
                 dbHelper.deleteSubFolder(model.content.id)
                 dbHelper.deleteCardBundleWithSubFolderId(model.content.id)
             }
-            is Item.Card -> {
+            is Item.CardBundle -> {
                 dbHelper.deleteCardBundle(model.content.id)
             }
         }
@@ -179,7 +179,7 @@ class FileViewHolder(
 ) : TreeViewHolder<Item>(binding.root) {
 
     override fun bind(data: Model<Item>) {
-        if (data.content !is Item.Card) return
+        if (data.content !is Item.CardBundle) return
 
         val padding = setPaddingStart(data)
 
@@ -193,7 +193,7 @@ class FolderViewHolder(
 ) : TreeViewHolder<Item>(binding.root) {
 
     override fun bind(data: Model<Item>) {
-        if (data.content is Item.Card) return
+        if (data.content is Item.CardBundle) return
 
         val padding = setPaddingStart(data)
 

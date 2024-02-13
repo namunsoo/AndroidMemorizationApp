@@ -101,10 +101,9 @@ class CardFragment : Fragment() {
             0
         )
         val itemsPerBinding = 10
-        val startRow = (cardViewModel.cardListRow.value!! / itemsPerBinding) * itemsPerBinding
         cardListViewModel.setValue(
             cardListViewModel.cardBundleId.value!!,
-            dbHelper.readCard(cardListViewModel.cardBundleId.value!!, startRow, itemsPerBinding).toMutableList())
+            dbHelper.readCard(cardListViewModel.cardBundleId.value!!, 0, itemsPerBinding).toMutableList())
         dbHelper.close()
         val builder: AlertDialog.Builder = AlertDialog.Builder(_mActivity)
         builder.setMessage(R.string.dialog_card_insert_complete)
