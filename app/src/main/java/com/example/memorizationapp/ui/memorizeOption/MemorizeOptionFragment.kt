@@ -53,6 +53,8 @@ class MemorizeOptionFragment : Fragment() {
         memorizeOptionViewModel = ViewModelProvider(requireActivity())[MemorizeOptionViewModel::class.java]
         _mActivity = activity as MainActivity
 
+        memorizeOptionViewModel.setValue(mutableListOf(), ALL, RANDOM)
+        
         return inflater.inflate(R.layout.fragment_memorize_option, container, false)
     }
 
@@ -199,7 +201,7 @@ class MemorizeOptionFragment : Fragment() {
         val scale = resources.displayMetrics.density
         val dpToPixel = (dp * scale + 0.5f).toInt()
 
-        setFolderSelectDialogItem(mainViewModel.modelList.value!!, linearLayout, dpToPixel, 0)
+        setFolderSelectDialogItem(mainViewModel.modelList.value!!, linearLayout, dpToPixel)
 
         val builder = AlertDialog.Builder(_mActivity)
         builder.setView(dialogView)
@@ -231,8 +233,8 @@ class MemorizeOptionFragment : Fragment() {
         folderSelectDialog = builder.create()
     }
 
-    private fun setFolderSelectDialogItem(models : MutableList<Model<Item>>, linearLayout: LinearLayout, distinguishedSize: Int, index: Int): Int {
-        var count = index
+    private var count = 0
+    private fun setFolderSelectDialogItem(models : MutableList<Model<Item>>, linearLayout: LinearLayout, distinguishedSize: Int) {
         for (model in models) {
             val itemView = layoutInflater.inflate(R.layout.item_card_check, null)
             itemView.findViewById<ImageView>(R.id.iv_icon).setPadding(distinguishedSize * model.depth,0,0,0)
@@ -242,29 +244,27 @@ class MemorizeOptionFragment : Fragment() {
             itemView.setOnClickListener {
                 checkItemAndSub(model, linearLayout, it.id, ctv.isChecked)
             }
-
+            count++
             when (model.content) {
                 is Item.MainFolder -> {
                     linearLayout.addView(itemView)
                     if (model.haveChildren) {
-                        count = setFolderSelectDialogItem(model.children, linearLayout, distinguishedSize, count + 1)
+                        setFolderSelectDialogItem(model.children, linearLayout, distinguishedSize)
                     }
                 }
                 is Item.SubFolder -> {
                     linearLayout.addView(itemView)
                     if (model.haveChildren) {
-                        count = setFolderSelectDialogItem(model.children, linearLayout, distinguishedSize, count + 1)
+                        setFolderSelectDialogItem(model.children, linearLayout, distinguishedSize)
                     }
                 }
                 is Item.CardBundle -> {
                     itemView.findViewById<ImageView>(R.id.iv_icon).setImageResource(R.drawable.ic_file)
                     linearLayout.addView(itemView)
-                    count++
                 }
-                else -> {}
+                else -> { }
             }
         }
-        return count
     }
 
     // 진짜 배열의 index 기준이 아니라 LinearLayout의 몇번째 행에 CheckTextBox인지

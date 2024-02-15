@@ -7,12 +7,6 @@ import com.example.memorizationapp.common.treeRecyclerView.Item
 import com.example.memorizationapp.common.treeRecyclerView.Model
 
 class MemorizeOptionViewModel : ViewModel() {
-    // private val _checkedRows: MutableList<Int> = mutableListOf()
-    //    private val _tempCheckedRows: MutableList<Int> = mutableListOf()
-    //    private val _cardTableId: MutableList<Int> = mutableListOf()
-    //    private val _tempCardTableId: MutableList<Int> = mutableListOf()
-    //    private var _cardType: String = ALL
-    //    private var _cardSequence: String = RANDOM
     private val _cardTableIdList = MutableLiveData<MutableList<Int>>(mutableListOf())
     private val _cardType = MutableLiveData<String>()
     private val _cardSequence = MutableLiveData<String>()

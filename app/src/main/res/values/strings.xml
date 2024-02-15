@@ -20,13 +20,15 @@
     <string name="menu_file_update">카드 묶음 수정</string>
     <string name="menu_card_list">카드</string>
     <string name="menu_card_create">카드 생성</string>
-    <string name="menu_card_update">카드 수정</string>
+    <string name="menu_card_update">카드 수정</string>\
 
     <string name="dialog_title">알림</string>
     <string name="dialog_error_title">알림</string>
     <string name="dialog_folder_create">폴더 이름을 입력하세요.</string>
     <string name="dialog_file_create">카드 이름을 입력하세요.</string>
     <string name="dialog_folder_delete">폴더를 삭제하시겠습니까?.</string>
+    <string name="dialog_delete">삭제하시겠습니까?.</string>
+    <string name="dialog_memorization_test_end">테스트를 종료하시겠습니까?</string>
     <string name="dialog_folder_delete_error">폴더 삭제중 오류가 발생했습니다.</string>
     <string name="dialog_folder_create_error">폴더 저장중 오류가 발생했습니다.</string>
     <string name="dialog_folder_update_error">폴더 수정중 오류가 발생했습니다.</string>
@@ -49,6 +51,7 @@
     <string name="common_save">저장</string>
     <string name="common_basics">기본</string>
     <string name="common_all">전체</string>
+    <string name="common_progress">진행도</string>
     <string name="common_random">무작위</string>
     <string name="common_memorizing">암기중</string>
     <string name="common_memorized">암기 완료</string>

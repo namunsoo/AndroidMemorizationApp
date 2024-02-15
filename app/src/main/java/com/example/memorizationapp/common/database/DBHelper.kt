@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper
 import com.example.memorizationapp.common.treeRecyclerView.Item
 import com.example.memorizationapp.common.treeRecyclerView.Model
 import com.example.memorizationapp.ui.cardList.CardItem
+import com.example.memorizationapp.ui.memorizationTest.MemorizationTestCard
+import com.example.memorizationapp.ui.memorizationTest.MemorizationTestCardId
 
 class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -347,6 +349,89 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             "${DB.CARD.COLUMN_ID} = ?",
             arrayOf(id.toString()))
         dbWrite.close()
+    }
+
+    fun readMemorizationTestCard(idList: List<Int>, cardType: String, cardSequence: String): Array<MemorizationTestCardId> {
+        val dbRead = this.readableDatabase
+        var cardTableNameIdList = listOf<Int>()
+        var array: Array<MemorizationTestCardId> = arrayOf()
+        var cursor: Cursor
+        var cardId: Int
+        var cardBundleId: Int
+
+        if (idList.isEmpty()) {
+
+            cursor = dbRead.rawQuery(
+                "SELECT ${DB.CARD_BUNDLE.COLUMN_ID} FROM ${DB.CARD_BUNDLE.TABLE_NAME}",null
+            )
+            while (cursor.moveToNext()) {
+                cardBundleId = cursor.getInt(cursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_ID) as Int)
+                cardTableNameIdList = cardTableNameIdList + listOf(cardBundleId)
+            }
+        } else {
+            cardTableNameIdList = idList
+        }
+
+        for (id in cardTableNameIdList) {
+            cursor = dbRead.query(
+                "${DB.CARD.TABLE_NAME}${id}",
+                null,
+                if (cardType == "all") null else "${DB.CARD.COLUMN_MEMORIZED} = ?",
+                if (cardType == "all") null else
+                    if (cardType == "memorized") arrayOf("1") else arrayOf("0"),
+                null,
+                null,
+                null,
+                null
+            )
+            while (cursor.moveToNext()) {
+                cardId = cursor.getInt(cursor.getColumnIndex(DB.CARD.COLUMN_ID) as Int)
+                cardBundleId = cursor.getInt(cursor.getColumnIndex(DB.CARD.CARD_BUNDLE_ID) as Int)
+                array += MemorizationTestCardId(cardId, cardBundleId)
+            }
+        }
+        dbRead.close()
+
+        if (cardSequence == "random") {
+            array.shuffle()
+        }
+        return array
+    }
+
+    fun readMemorizationTestCardItem(cardId: Int, cardBundleId: Int): MemorizationTestCard {
+        val dbRead = this.readableDatabase
+        val cursorCard = dbRead.query(
+            "${DB.CARD.TABLE_NAME}${cardBundleId}",
+            null,
+            "${DB.CARD.COLUMN_ID} = ?",
+            arrayOf(cardId.toString()),
+            null,
+            null,
+            null,
+            null
+        )
+        val cursorCardBundle = dbRead.query(
+            "${DB.CARD_BUNDLE.TABLE_NAME}",
+            null,
+            "${DB.CARD_BUNDLE.COLUMN_ID} = ?",
+            arrayOf(cardBundleId.toString()),
+            null,
+            null,
+            null,
+            null
+        )
+        cursorCard.moveToLast()
+        cursorCardBundle.moveToLast()
+        val id = cursorCard.getInt(cursorCard.getColumnIndex(DB.CARD.COLUMN_ID) as Int)
+        val cardBundleName = cursorCardBundle.getString(cursorCardBundle.getColumnIndex(DB.CARD_BUNDLE.COLUMN_NAME) as Int)
+        val question = cursorCard.getString(cursorCard.getColumnIndex(DB.CARD.COLUMN_QUESTION) as Int)
+        val answer = cursorCard.getString(cursorCard.getColumnIndex(DB.CARD.COLUMN_ANSWER) as Int)
+        val memorized = cursorCard.getInt(cursorCard.getColumnIndex(DB.CARD.COLUMN_MEMORIZED) as Int)
+        val item = MemorizationTestCard(
+            id, cardBundleName, question, answer, memorized
+        )
+        dbRead.close()
+        return item
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {

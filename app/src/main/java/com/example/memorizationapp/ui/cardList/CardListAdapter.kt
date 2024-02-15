@@ -22,10 +22,10 @@ class CardListAdapter(
     private val cards: MutableList<CardItem>
 ) : RecyclerView.Adapter<CardListAdapter.CardViewHolder>() {
 
-    private lateinit var cardViewModel: CardViewModel
+    private val cardViewModel = ViewModelProvider(_mActivity)[CardViewModel::class.java]
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
 
-        cardViewModel = ViewModelProvider(_mActivity)[CardViewModel::class.java]
+        //cardViewModel = ViewModelProvider(_mActivity)[CardViewModel::class.java]
 
         return CardViewHolder(
             ItemCardListBinding.inflate(

@@ -1,5 +1,6 @@
 package com.example.memorizationapp.common.treeRecyclerView
 
+import android.app.AlertDialog
 import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.View
@@ -133,25 +134,39 @@ class FolderTreeAdapter (private val _mActivity: MainActivity, models: List<Mode
     }
 
     private fun deleteFolderOrFile(model: Model<Item>){
-        val dbHelper = DBHelper(_mActivity)
-        when(model.content){
-            is Item.MainFolder -> {
-                dbHelper.deleteMainFolder(model.content.id)
-                dbHelper.deleteSubFolders(model.children)
-                dbHelper.deleteCardBundleWithMainFolderId(model.content.id)
+        val alertDialogBuilder = AlertDialog.Builder(_mActivity)
+        alertDialogBuilder.setTitle(R.string.dialog_title).setMessage(R.string.dialog_delete)
+
+        alertDialogBuilder.setPositiveButton(R.string.common_confirm) { dialog, _ ->
+            val dbHelper = DBHelper(_mActivity)
+            when(model.content){
+                is Item.MainFolder -> {
+                    dbHelper.deleteMainFolder(model.content.id)
+                    dbHelper.deleteSubFolders(model.children)
+                    dbHelper.deleteCardBundleWithMainFolderId(model.content.id)
+                }
+                is Item.SubFolder -> {
+                    dbHelper.deleteSubFolder(model.content.id)
+                    dbHelper.deleteCardBundleWithSubFolderId(model.content.id)
+                }
+                is Item.CardBundle -> {
+                    dbHelper.deleteCardBundle(model.content.id)
+                }
             }
-            is Item.SubFolder -> {
-                dbHelper.deleteSubFolder(model.content.id)
-                dbHelper.deleteCardBundleWithSubFolderId(model.content.id)
-            }
-            is Item.CardBundle -> {
-                dbHelper.deleteCardBundle(model.content.id)
-            }
+            dbHelper.close()
+            val pathList = folderTreeCommon.getTargetTree(model)
+            folderTreeCommon.deleteModel(mainViewModel.modelList.value!!, pathList, 0)
+            mainViewModel.setValue(mainViewModel.modelList.value!!)
+            dialog.dismiss()
         }
-        dbHelper.close()
-        val pathList = folderTreeCommon.getTargetTree(model)
-        folderTreeCommon.deleteModel(mainViewModel.modelList.value!!, pathList, 0)
-        mainViewModel.setValue(mainViewModel.modelList.value!!)
+
+        alertDialogBuilder.setNegativeButton(R.string.common_cancel) { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val alertDialog: AlertDialog = alertDialogBuilder.create()
+        alertDialog.show()
+
     }
 
     private fun View.setOnSingleClickListener(onSingleClick: (View) -> Unit) {
