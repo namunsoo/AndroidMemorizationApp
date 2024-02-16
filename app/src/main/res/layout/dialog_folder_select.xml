@@ -6,7 +6,7 @@
     android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/dialog_folder_select_title"
+        android:id="@+id/tv_folder_select_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/text_padding"
@@ -23,7 +23,7 @@
         android:paddingTop="2dp"
         android:paddingBottom="2dp"
         android:background="@color/basics_base_level2"
-        app:layout_constraintTop_toBottomOf="@id/dialog_folder_select_title">
+        app:layout_constraintTop_toBottomOf="@id/tv_folder_select_title">
 
         <ScrollView
             android:layout_width="match_parent"

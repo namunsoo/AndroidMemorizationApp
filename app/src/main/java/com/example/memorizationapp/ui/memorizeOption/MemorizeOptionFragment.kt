@@ -42,7 +42,7 @@ class MemorizeOptionFragment : Fragment() {
     private val _tempCheckedRows: MutableList<Int> = mutableListOf()
     private val _cardTableId: MutableList<Int> = mutableListOf()
     private val _tempCardTableId: MutableList<Int> = mutableListOf()
-    private var _cardType: String = ALL
+    private var _cardType: String = MEMORIZING
     private var _cardSequence: String = RANDOM
 
     override fun onCreateView(
@@ -53,7 +53,7 @@ class MemorizeOptionFragment : Fragment() {
         memorizeOptionViewModel = ViewModelProvider(requireActivity())[MemorizeOptionViewModel::class.java]
         _mActivity = activity as MainActivity
 
-        memorizeOptionViewModel.setValue(mutableListOf(), ALL, RANDOM)
+        memorizeOptionViewModel.setValue(mutableListOf(), MEMORIZING, RANDOM)
         
         return inflater.inflate(R.layout.fragment_memorize_option, container, false)
     }
@@ -120,10 +120,10 @@ class MemorizeOptionFragment : Fragment() {
             _cardSequence = tempCardSequence
             when (_cardSequence) {
                 RANDOM -> {
-                    view?.findViewById<TextView>(R.id.iv_card_sequence_result)!!.text = getString(R.string.common_random)
+                    view?.findViewById<TextView>(R.id.tv_card_sequence_result)!!.text = getString(R.string.common_random)
                 }
                 else -> {
-                    view?.findViewById<TextView>(R.id.iv_card_sequence_result)!!.text = getString(R.string.common_basics)
+                    view?.findViewById<TextView>(R.id.tv_card_sequence_result)!!.text = getString(R.string.common_basics)
                 }
             }
             dialog.dismiss()
@@ -168,13 +168,13 @@ class MemorizeOptionFragment : Fragment() {
             _cardType = tempCardType
             when (_cardType) {
                 MEMORIZING -> {
-                    view?.findViewById<TextView>(R.id.iv_card_type_result)!!.text = getString(R.string.common_memorizing)
+                    view?.findViewById<TextView>(R.id.tv_card_type_result)!!.text = getString(R.string.common_memorizing)
                 }
                 MEMORIZED -> {
-                    view?.findViewById<TextView>(R.id.iv_card_type_result)!!.text = getString(R.string.common_memorized)
+                    view?.findViewById<TextView>(R.id.tv_card_type_result)!!.text = getString(R.string.common_memorized)
                 }
                 else -> {
-                    view?.findViewById<TextView>(R.id.iv_card_type_result)!!.text = getString(R.string.common_all)
+                    view?.findViewById<TextView>(R.id.tv_card_type_result)!!.text = getString(R.string.common_all)
                 }
             }
             dialog.dismiss()
@@ -210,7 +210,7 @@ class MemorizeOptionFragment : Fragment() {
             _tempCheckedRows.addAll(_checkedRows)
             _cardTableId.clear()
             _cardTableId.addAll(_tempCardTableId)
-            view?.findViewById<TextView>(R.id.iv_file_choice_result)!!.text = if (_cardTableId.isEmpty())
+            view?.findViewById<TextView>(R.id.tv_file_choice_result)!!.text = if (_cardTableId.isEmpty())
                 getString(R.string.common_all) else "${_cardTableId.count()} 개 카드 묶음"
             dialog.dismiss()
         }

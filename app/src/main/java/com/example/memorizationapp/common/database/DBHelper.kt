@@ -331,11 +331,15 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         dbWrite.close()
     }
 
-    fun updateCard(id: Int, cardBundleId: Int, question: String, answer: String) {
+    fun updateCard(id: Int, cardBundleId: Int, question: String, answer: String, memorized: Int? = null) {
         val dbWrite = this.writableDatabase
         val contentValues = ContentValues()
         contentValues.put(DB.CARD.COLUMN_QUESTION, question)
         contentValues.put(DB.CARD.COLUMN_ANSWER, answer)
+        if(memorized != null) {
+            contentValues.put(DB.CARD.COLUMN_MEMORIZED, memorized)
+        }
+
         dbWrite.update("${DB.CARD.TABLE_NAME}${cardBundleId}",
             contentValues,
             "${DB.CARD.COLUMN_ID} = ?",
@@ -387,7 +391,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             while (cursor.moveToNext()) {
                 cardId = cursor.getInt(cursor.getColumnIndex(DB.CARD.COLUMN_ID) as Int)
                 cardBundleId = cursor.getInt(cursor.getColumnIndex(DB.CARD.CARD_BUNDLE_ID) as Int)
-                array += MemorizationTestCardId(cardId, cardBundleId)
+                array += MemorizationTestCardId(cardId, cardBundleId, 0)
             }
         }
         dbRead.close()
@@ -423,12 +427,13 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         cursorCard.moveToLast()
         cursorCardBundle.moveToLast()
         val id = cursorCard.getInt(cursorCard.getColumnIndex(DB.CARD.COLUMN_ID) as Int)
+        val cardBundleId = cursorCard.getInt(cursorCard.getColumnIndex(DB.CARD.CARD_BUNDLE_ID) as Int)
         val cardBundleName = cursorCardBundle.getString(cursorCardBundle.getColumnIndex(DB.CARD_BUNDLE.COLUMN_NAME) as Int)
         val question = cursorCard.getString(cursorCard.getColumnIndex(DB.CARD.COLUMN_QUESTION) as Int)
         val answer = cursorCard.getString(cursorCard.getColumnIndex(DB.CARD.COLUMN_ANSWER) as Int)
         val memorized = cursorCard.getInt(cursorCard.getColumnIndex(DB.CARD.COLUMN_MEMORIZED) as Int)
         val item = MemorizationTestCard(
-            id, cardBundleName, question, answer, memorized
+            id, cardBundleId, cardBundleName, question, answer, memorized
         )
         dbRead.close()
         return item

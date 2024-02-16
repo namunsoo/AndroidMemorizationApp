@@ -145,10 +145,20 @@ class CardListAdapter(
 
     override fun getItemCount(): Int = cards.size
 
+    // 확실하지는 않은데 메모리 절약용
+    // view holder에서서 정의된 리스너는 제거가 안된다고 하는데
+    // (그러니까 리스너가 계속 남아있음)
+    // 따로 절약하기 위해서 넣어둠
+    // fragment 나갈때는 알아서 제거됨
+    override fun onViewRecycled(holder: CardViewHolder) {
+        holder.itemView.setOnClickListener(null)
+        super.onViewRecycled(holder)
+    }
+
     inner class CardViewHolder(binding: ItemCardListBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        val question: TextView = binding.cardQuestion
-        val answer: TextView = binding.cardAnswer
+        val question: TextView = binding.tvCardQuestion
+        val answer: TextView = binding.tvCardAnswer
     }
 
     companion object {

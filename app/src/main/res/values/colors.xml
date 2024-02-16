@@ -13,4 +13,8 @@
     <color name="basics_base_level2">#B0D9B1</color>
     <color name="basics_base_level1">#D0E7D2</color>
     <color name="basics_textColor">#555843</color>
+    <color name="basics_textColor_red">#DB4455</color>
+    <color name="basics_textColor_green">#3CB371</color>
+    <color name="basics_green">#99BC85</color>
+    <color name="basics_red">#FF6868</color>
 </resources>

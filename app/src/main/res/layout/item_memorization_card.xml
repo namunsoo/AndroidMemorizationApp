@@ -4,72 +4,130 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <ScrollView
-        android:fillViewport="true"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/ll_top"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="1dp"
+            android:background="@color/basics_base_level4"
             app:layout_constraintTop_toTopOf="parent">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent">
+
+                <TextView
+                    android:id="@+id/tv_card_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/text_padding"
+                    android:background="@color/basics_base_level2"
+                    android:textAppearance="?attr/textAppearanceListItem" />
+
+                <ImageButton
+                    android:id="@+id/btn_card_update"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:padding="3dp"
+                    android:background="#00000000"
+                    android:src="@drawable/ic_update"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="85dp"
+                    android:visibility="gone"
+                    android:contentDescription="@string/common_image_error"/>
+
+                <ImageButton
+                    android:id="@+id/btn_card_delete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#00000000"
+                    android:src="@drawable/ic_delete"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="45dp"
+                    android:visibility="gone"
+                    android:contentDescription="@string/common_image_error"/>
+
+                <ImageButton
+                    android:id="@+id/btn_card_setting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#00000000"
+                    android:src="@drawable/ic_setting"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="5dp"
+                    android:visibility="visible"
+                    android:contentDescription="@string/common_image_error"/>
+            </FrameLayout>
+        </LinearLayout>
+        <ScrollView
+            android:id="@+id/sv_card"
+            android:fillViewport="true"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/ll_top"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="1dp"
-                android:background="@color/basics_base_level4">
-
+                android:orientation="vertical"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="1dp"
+                    android:background="@color/basics_base_level4">
 
                     <TextView
-                        android:id="@+id/card_question"
+                        android:id="@+id/tv_card_question"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="@dimen/text_padding"
-                        android:background="@color/basics_base_level2"
+                        android:background="@color/basics_base_level1"
                         android:textAppearance="?attr/textAppearanceListItem" />
 
-                    <ImageButton
-                        android:id="@+id/btn_card_setting"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="#00000000"
-                        android:src="@drawable/ic_setting"
-                        android:layout_gravity="top|end"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginRight="5dp"
-                        android:visibility="visible"
-                        android:contentDescription="@string/common_image_error"/>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:padding="1dp"
+                    android:background="@color/basics_base_level4">
+
+                    <TextView
+                        android:id="@+id/tv_card_answer"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/basics_base_level1"
+                        android:padding="@dimen/text_padding"
+                        android:textAppearance="?attr/textAppearanceListItem" />
+
+                    <View
+                        android:id="@+id/card_answer_cover"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/pattern"
+                        android:visibility="visible"/>
                 </FrameLayout>
             </LinearLayout>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:padding="1dp"
-                android:background="@color/basics_base_level4">
-                <TextView
-                    android:id="@+id/card_answer"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="@dimen/text_padding"
-                    android:background="@color/basics_base_level1"
-                    android:textAppearance="?attr/textAppearanceListItem" />
-                <View
-                    android:id="@+id/card_answer_cover"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/pattern"
-                    android:visibility="visible"/>
-            </FrameLayout>
-        </LinearLayout>
-    </ScrollView>
+        </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

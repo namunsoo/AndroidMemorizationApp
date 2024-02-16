@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <size android:width="10dp"
-        android:height="10dp"/>
-    <solid android:color="@color/basics_base_level3"/>
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Layer 1: Background color -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/basics_base_level1"/> <!-- Set your desired background color here -->
+        </shape>
+    </item>
+    <!-- Layer 2: Bitmap -->
+    <item>
+        <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+            android:src="@drawable/ic_pattern"
+            android:tint="@color/basics_base_level4"
+            android:tileMode="repeat"/>
+    </item>
+</layer-list>

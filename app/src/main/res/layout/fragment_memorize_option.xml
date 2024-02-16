@@ -27,7 +27,7 @@
                 android:background="@color/basics_base_level1"
                 android:orientation="horizontal">
                 <TextView
-                    android:id="@+id/iv_folder_choice_title"
+                    android:id="@+id/tv_folder_choice_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/text_padding"
@@ -37,7 +37,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"/>
 
                 <TextView
-                    android:id="@+id/iv_file_choice_result"
+                    android:id="@+id/tv_file_choice_result"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/text_padding"
@@ -62,7 +62,7 @@
                 android:background="@color/basics_base_level1"
                 android:orientation="horizontal">
                 <TextView
-                    android:id="@+id/iv_card_type_title"
+                    android:id="@+id/tv_card_type_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/text_padding"
@@ -72,7 +72,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"/>
 
                 <TextView
-                    android:id="@+id/iv_card_type_result"
+                    android:id="@+id/tv_card_type_result"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/text_padding"
@@ -97,7 +97,7 @@
                 android:background="@color/basics_base_level1"
                 android:orientation="horizontal">
                 <TextView
-                    android:id="@+id/iv_card_sequence_title"
+                    android:id="@+id/tv_card_sequence_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/text_padding"
@@ -107,7 +107,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"/>
 
                 <TextView
-                    android:id="@+id/iv_card_sequence_result"
+                    android:id="@+id/tv_card_sequence_result"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/text_padding"

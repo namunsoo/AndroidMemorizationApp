@@ -1,5 +1,6 @@
 package com.example.memorizationapp
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -107,6 +108,7 @@ class MainActivity : AppCompatActivity() {
 
     // 첫 번째 뒤로 가기 버튼을 누를 때 표시
     private var toast: Toast? = null
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         // super.onBackPressed()
         // 기존 뒤로 가기 버튼의 기능을 막기 위해 주석 처리 또는 삭제

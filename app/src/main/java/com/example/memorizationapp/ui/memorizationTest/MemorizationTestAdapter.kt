@@ -1,11 +1,13 @@
 package com.example.memorizationapp.ui.memorizationTest
 
-import android.content.Context
-import android.opengl.Visibility
+import android.app.AlertDialog
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
@@ -13,16 +15,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.memorizationapp.MainActivity
 import com.example.memorizationapp.R
 import com.example.memorizationapp.common.database.DBHelper
+import com.example.memorizationapp.ui.card.CardViewModel
 import com.example.memorizationapp.ui.memorizeOption.MemorizeOptionViewModel
 
 class MemorizationTestAdapter(private val _mActivity: MainActivity, private val progressTextView: TextView, private val progressSeeBar: SeekBar, private val progressText: String) : RecyclerView.Adapter<MemorizationTestAdapter.ViewHolder>() {
     private val memorizeOptionViewModel = ViewModelProvider(_mActivity)[MemorizeOptionViewModel::class.java]
+    private val memorizationTestViewModel = ViewModelProvider(_mActivity)[MemorizationTestViewModel::class.java]
+    private val cardViewModel = ViewModelProvider(_mActivity)[CardViewModel::class.java]
     private val itemList: MutableList<MemorizationTestCard> = mutableListOf()
     private var itemCount = 0
     private val cardIdAndCardTableIdList: Array<MemorizationTestCardId>
     private var cardCount = 0
 
     init {
+
         val dbHelper = DBHelper(_mActivity)
         cardIdAndCardTableIdList = dbHelper.readMemorizationTestCard(
             memorizeOptionViewModel.cardTableIdList.value!!,
@@ -62,8 +68,6 @@ class MemorizationTestAdapter(private val _mActivity: MainActivity, private val 
         return itemCount
     }
 
-    private var beforePosition = 0
-
     fun addNextItem(position: Int, cardCenterIndex: Int): Int {
         var centerIndex = cardCenterIndex
         var text: String
@@ -74,7 +78,7 @@ class MemorizationTestAdapter(private val _mActivity: MainActivity, private val 
             dbHelper.close()
             itemList.removeAt(0)
             notifyItemRemoved(0)
-            notifyItemInserted(itemCount - 1)
+            notifyItemInserted(itemCount)
             text = "$progressText ${centerIndex+1} / $cardCount"
             progressSeeBar.progress = centerIndex+1
         } else {
@@ -136,6 +140,10 @@ class MemorizationTestAdapter(private val _mActivity: MainActivity, private val 
         return index
     }
 
+    fun getMaxIndex(): Int {
+        return itemCount - 1
+    }
+
     fun getCardCenter(cardIndex: Int): Int {
         if (cardCount >= 5) {
             if (cardIndex > cardCount - 2) {
@@ -148,21 +156,124 @@ class MemorizationTestAdapter(private val _mActivity: MainActivity, private val 
         }
         return 2
     }
+
+    fun setCurrentCardMemorized(position: Int, isMemorized: Boolean, cardCenterIndex: Int) {
+        val dbHelper = DBHelper(_mActivity)
+        if (isMemorized) {
+            dbHelper.updateCard(
+                itemList[position].id,
+                itemList[position].cardBundleId,
+                itemList[position].question,
+                itemList[position].answer,
+                1
+            )
+        } else {
+            dbHelper.updateCard(
+                itemList[position].id,
+                itemList[position].cardBundleId,
+                itemList[position].question,
+                itemList[position].answer,
+                0
+            )
+        }
+        dbHelper.close()
+
+        if (cardCount >= 5) {
+            cardIdAndCardTableIdList[cardCenterIndex - 2 + position].success = if (isMemorized) 1 else 0
+        } else if (cardCount > 0) {
+            cardIdAndCardTableIdList[position].success = if (isMemorized) 1 else 0
+        }
+    }
+
+    fun getTestResult(): String {
+        var totalSuccess = 0
+        for (item in cardIdAndCardTableIdList) {
+            if (item.success == 1) {
+                totalSuccess++
+            }
+        }
+        return "$cardCount 중 $totalSuccess 개 암기성공"
+    }
+
+    // 확실하지는 않은데 메모리 절약용
+    // view holder에서서 정의된 리스너는 제거가 안된다고 하는데
+    // (그러니까 리스너가 계속 남아있음)
+    // 따로 절약하기 위해서 넣어둠
+    // fragment 나갈때는 알아서 제거됨
+    override fun onViewRecycled(holder: ViewHolder) {
+        holder.itemView.setOnClickListener(null)
+        super.onViewRecycled(holder)
+    }
+
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(position: Int) {
-            itemView.findViewById<TextView>(R.id.card_question).text = itemList[position].question
-            itemView.findViewById<TextView>(R.id.card_answer).text = itemList[position].answer
+            itemView.findViewById<TextView>(R.id.tv_card_question).text = itemList[position].question
+            itemView.findViewById<TextView>(R.id.tv_card_answer).text = itemList[position].answer
+            itemView.findViewById<TextView>(R.id.tv_card_name).text = itemList[position].cardBundleName
             itemView.findViewById<View>(R.id.card_answer_cover).setOnClickListener {
                 if (it.visibility == View.VISIBLE) {
                     it.visibility = View.GONE
                 }
             }
-            itemView.findViewById<TextView>(R.id.card_answer).setOnClickListener {
+            itemView.findViewById<TextView>(R.id.tv_card_answer).setOnClickListener {
                 val cover = (it.parent as FrameLayout).getChildAt(1)
                 if (cover.visibility == View.GONE) {
                     cover.visibility = View.VISIBLE
                 }
             }
+
+            val buttonSetting = itemView.findViewById<ImageButton>(R.id.btn_card_setting)
+            val buttonUpdate = itemView.findViewById<ImageButton>(R.id.btn_card_update)
+            val buttonDelete = itemView.findViewById<ImageButton>(R.id.btn_card_delete)
+            buttonSetting.setOnClickListener {
+                if (buttonUpdate.visibility == View.VISIBLE && buttonDelete.visibility == View.VISIBLE) {
+                    val fadeOut = AlphaAnimation(1f, 0f)
+                    fadeOut.duration = 400
+                    buttonUpdate.startAnimation(fadeOut)
+                    buttonUpdate.visibility = View.GONE
+                    Handler().postDelayed({
+                        buttonDelete.startAnimation(fadeOut)
+                        buttonDelete.visibility = View.GONE
+                    }, 500)
+
+                } else {
+                    val fadeIn = AlphaAnimation(0f, 1f)
+                    fadeIn.duration = 400
+                    buttonDelete.visibility = View.VISIBLE
+                    buttonDelete.startAnimation(fadeIn)
+                    Handler().postDelayed({
+                        buttonUpdate.visibility = View.VISIBLE
+                        buttonUpdate.startAnimation(fadeIn)
+                    }, 500)
+                }
+            }
+
+            val data = itemList[position]
+            buttonUpdate.setOnClickListener {
+                memorizationTestViewModel.position = position
+                cardViewModel.setValue(0, data.id, data.cardBundleId, data.question, data.answer, data.memorized, UPDATE)
+                _mActivity.supportActionBar!!.show()
+                _mActivity.changeFragment(R.id.nav_card)
+            }
+            buttonDelete.setOnClickListener {
+                val alertDialogBuilder = AlertDialog.Builder(_mActivity)
+                alertDialogBuilder.setTitle(R.string.dialog_title).setMessage(R.string.dialog_card_delete)
+
+                alertDialogBuilder.setPositiveButton(R.string.common_confirm) { dialog, _ ->
+                    dialog.dismiss()
+                }
+
+                alertDialogBuilder.setNegativeButton(R.string.common_cancel) { dialog, _ ->
+                    dialog.dismiss()
+                }
+
+                val alertDialog: AlertDialog = alertDialogBuilder.create()
+                alertDialog.show()
+            }
         }
+    }
+
+    companion object {
+        private const val UPDATE = "update"
     }
 }

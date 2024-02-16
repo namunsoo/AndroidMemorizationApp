@@ -31,7 +31,7 @@
                 android:layout_height="match_parent">
 
                 <TextView
-                    android:id="@+id/card_question"
+                    android:id="@+id/tv_card_question"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/text_padding"
@@ -86,7 +86,7 @@
             android:padding="1dp"
             android:background="@color/basics_base_level4">
             <TextView
-                android:id="@+id/card_answer"
+                android:id="@+id/tv_card_answer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/text_padding"
