@@ -34,7 +34,7 @@
                     android:layout_height="120dp"
                     android:layout_gravity="center"
                     android:max="100"
-                    android:progress="80"
+                    android:progress="1000"
                     android:progressDrawable="@drawable/circular_progress_bar" />
 
                 <TextView
@@ -42,10 +42,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:text="80%"
+                    android:textColor="@color/basics_textColor"
                     android:textSize="30sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/basics_textColor" />
+                    android:textStyle="bold" />
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>
@@ -63,7 +62,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:text="전체"
+                android:text="@string/common_all"
                 android:textStyle="bold"
                 android:textColor="@color/basics_textColor"/>
 
@@ -71,7 +70,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:text="암기중"
+                android:text="@string/common_memorizing"
                 android:textStyle="bold"
                 android:textColor="@color/basics_textColor"/>
 
@@ -79,7 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:text="암기 완료"
+                android:text="@string/common_memorized"
                 android:textStyle="bold"
                 android:textColor="@color/basics_textColor" />
 
@@ -90,26 +89,26 @@
             android:layout_height="match_parent" >
 
             <TextView
+                android:id="@+id/tv_nav_allCards"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:text="100"
                 android:textStyle="bold"
                 android:textColor="@color/basics_textColor"/>
 
             <TextView
+                android:id="@+id/tv_nav_memorizing"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:text="20"
                 android:textStyle="bold"
                 android:textColor="@color/basics_textColor"/>
 
             <TextView
+                android:id="@+id/tv_nav_memorized"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:text="80"
                 android:textStyle="bold"
                 android:textColor="@color/basics_textColor"/>
         </TableRow>

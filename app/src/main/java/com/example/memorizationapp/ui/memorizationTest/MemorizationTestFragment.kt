@@ -34,8 +34,7 @@ class MemorizationTestFragment : Fragment() {
         memorizationTestViewModel = ViewModelProvider(requireActivity())[MemorizationTestViewModel::class.java]
         memorizeOptionViewModel = ViewModelProvider(requireActivity())[MemorizeOptionViewModel::class.java]
         _mActivity = activity as MainActivity
-
-        val test = memorizationTestViewModel.position == null
+        _mActivity.stopNavigationDrawer()
 
         // 상단바 지우기
         _mActivity.supportActionBar!!.hide()
@@ -45,6 +44,7 @@ class MemorizationTestFragment : Fragment() {
             alertDialogBuilder.setTitle(R.string.dialog_title).setMessage(R.string.dialog_memorization_test_end)
 
             alertDialogBuilder.setPositiveButton(R.string.common_confirm) { dialog, _ ->
+                _mActivity.startNavigationDrawer()
                 _mActivity.changeFragment(R.id.nav_main)
                 _mActivity.supportActionBar!!.show()
                 this.onDestroy()
@@ -67,32 +67,17 @@ class MemorizationTestFragment : Fragment() {
         val adapter = MemorizationTestAdapter(_mActivity, binding.tvProgress, binding.sbProgress,getString(R.string.common_progress))
         viewPager.adapter = adapter
 
+        var isFromOtherEvent = false
         // 수정후 파일 업데이트
-        if(memorizationTestViewModel.cardCenterIndex == null) {
+        if(memorizationTestViewModel.cardCenterIndex == null || memorizationTestViewModel.cardIndex == null) {
             memorizationTestViewModel.cardCenterIndex = 2 // 페이지 5개로 재사용? 해서 그 중간이
         } else {
-//            val cardIndex = memorizationTestViewModel.cardCenterIndex!! -2
-//            setAdapterNewItems(viewPager, cardCenterIndex!!)
-//            val viewPagerAdapter = (viewPager.adapter as MemorizationTestAdapter)
-//            isFromOtherEvent = true
-//            memorizationTestViewModel.cardCenterIndex = viewPagerAdapter.getCardCenter(seekBar!!.progress)
-//            val index = viewPagerAdapter.setTargetCardItems(seekBar!!.progress)
-//
-//            // 도저히 이방법 말고는 못찾음
-//            // 딜레이 안주면 정상적으로 작동하지 않는경우가 있음
-//            // 내 예상은 아이템이 정렬하기 전에 setCurrentItem이 먼저 실행되는거 같음
-//            val delayMillis = 200 // 0.2 초
-//            Handler().postDelayed({
-//                viewPager.setCurrentItem(index, true)
-//            }, delayMillis.toLong())
+            isFromOtherEvent = true
+            setAdapterNewItems(viewPager, memorizationTestViewModel.cardIndex!! + 1)
         }
 
-        if(memorizationTestViewModel.cardCenterIndex == null) {
-            memorizationTestViewModel.cardCenterIndex = 2 // 페이지 5개로 재사용? 해서 그 중간이
-        }
         // 여러가지 이유로 복작하게 설계 (일단 테스트는 정상)
         var lastPosition = viewPager.currentItem
-        var isFromOtherEvent = false
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 // onPageSelected는 여러번 불러서 한번만 하도록
@@ -150,6 +135,7 @@ class MemorizationTestFragment : Fragment() {
                 alertDialogBuilder.setTitle(R.string.dialog_test_result).setMessage(viewPagerAdapter.getTestResult())
 
                 alertDialogBuilder.setPositiveButton(R.string.common_go_main) { dialog, _ ->
+                    _mActivity.startNavigationDrawer()
                     _mActivity.changeFragment(R.id.nav_main)
                     _mActivity.supportActionBar!!.show()
                     dialog.dismiss()
@@ -184,6 +170,7 @@ class MemorizationTestFragment : Fragment() {
                 alertDialogBuilder.setTitle(R.string.dialog_test_result).setMessage(viewPagerAdapter.getTestResult())
 
                 alertDialogBuilder.setPositiveButton(R.string.common_go_main) { dialog, _ ->
+                    _mActivity.startNavigationDrawer()
                     _mActivity.changeFragment(R.id.nav_main)
                     _mActivity.supportActionBar!!.show()
                     dialog.dismiss()
@@ -217,6 +204,7 @@ class MemorizationTestFragment : Fragment() {
         super.onDestroy()
         memorizationTestViewModel.cardIdAndCardTableIdList = mutableListOf()
         memorizationTestViewModel.cardCenterIndex = null
+        memorizationTestViewModel.cardIndex = null
         memorizationTestViewModel.position = null
     }
 }

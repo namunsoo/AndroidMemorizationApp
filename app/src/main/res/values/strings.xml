@@ -27,7 +27,7 @@
     <string name="dialog_error_title">알림</string>
     <string name="dialog_folder_create">폴더 이름을 입력하세요.</string>
     <string name="dialog_file_create">카드 이름을 입력하세요.</string>
-    <string name="dialog_folder_delete">폴더를 삭제하시겠습니까?.</string>
+    <string name="dialog_folder_delete">폴더를 삭제하시겠습니까?</string>
     <string name="dialog_delete">삭제하시겠습니까?.</string>
     <string name="dialog_memorization_test_end">테스트를 종료하시겠습니까?</string>
     <string name="dialog_folder_delete_error">폴더 삭제중 오류가 발생했습니다.</string>

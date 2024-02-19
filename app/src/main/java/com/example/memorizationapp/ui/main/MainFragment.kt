@@ -68,8 +68,12 @@ class MainFragment : Fragment() {
         }
 
         mainViewModel.modelList.observe(_mActivity, Observer {
-            getFolderTree()
+            val models = mainViewModel.modelList.value!!
+            val recyclerView = binding.rvFolderList
+            recyclerView.adapter = FolderTreeAdapter(_mActivity, models.toList())
         })
+
+        getFolderTree()
     }
 
     private fun getFolderTree() {

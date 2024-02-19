@@ -7,5 +7,6 @@ import androidx.lifecycle.ViewModel
 class MemorizationTestViewModel : ViewModel() {
     var cardIdAndCardTableIdList: MutableList<MemorizationTestCard> = mutableListOf()
     var cardCenterIndex: Int? = null
+    var cardIndex: Int? = null
     var position: Int? = null
 }

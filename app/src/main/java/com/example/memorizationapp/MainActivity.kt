@@ -1,9 +1,14 @@
 package com.example.memorizationapp
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
+import android.util.AttributeSet
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +18,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.memorizationapp.common.database.DBHelper
 import com.example.memorizationapp.databinding.ActivityMainBinding
 import com.example.memorizationapp.ui.card.CardViewModel
 import com.example.memorizationapp.ui.cardList.CardListViewModel
@@ -46,8 +52,20 @@ class MainActivity : AppCompatActivity() {
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
+
+        val dbHelper = DBHelper(this)
+        val values = dbHelper.getProgressionDegree()
+        dbHelper.close()
+        navView.getHeaderView(0).findViewById<TextView>(R.id.tv_nav_allCards).text = values[0].toString()
+        navView.getHeaderView(0).findViewById<TextView>(R.id.tv_nav_memorized).text = values[1].toString()
+        navView.getHeaderView(0).findViewById<TextView>(R.id.tv_nav_memorizing).text = values[2].toString()
+        val percentage = ((values[1].toDouble() / values[0]) * 100).toInt()
+        val percentageText = "$percentage%"
+        navView.getHeaderView(0).findViewById<TextView>(R.id.tv_progressText).text = percentageText
+        navView.getHeaderView(0).findViewById<ProgressBar>(R.id.circularProgressBar).progress = percentage
+
+        //drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_main
@@ -136,6 +154,14 @@ class MainActivity : AppCompatActivity() {
     fun goBack(){
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         navController.popBackStack()
+    }
+
+    fun stopNavigationDrawer() {
+        binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+    }
+
+    fun startNavigationDrawer() {
+        binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
     }
 
     override fun onDestroy() {

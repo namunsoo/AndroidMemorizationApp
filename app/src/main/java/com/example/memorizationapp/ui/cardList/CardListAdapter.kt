@@ -83,6 +83,9 @@ class CardListAdapter(
                 dbHelper.close()
                 val index = cards.indexOfFirst { it.row == data.row }
                 cards.removeAt(index)
+                for (i in index until  cards.count()) {
+                    cards[i].row--
+                }
                 notifyItemRangeRemoved(index, 1)
                 dialog.dismiss()
             }

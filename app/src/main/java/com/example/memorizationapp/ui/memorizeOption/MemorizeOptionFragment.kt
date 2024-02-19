@@ -54,7 +54,7 @@ class MemorizeOptionFragment : Fragment() {
         _mActivity = activity as MainActivity
 
         memorizeOptionViewModel.setValue(mutableListOf(), MEMORIZING, RANDOM)
-        
+
         return inflater.inflate(R.layout.fragment_memorize_option, container, false)
     }
 

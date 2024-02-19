@@ -24,7 +24,7 @@ class MemorizationTestAdapter(private val _mActivity: MainActivity, private val 
     private val cardViewModel = ViewModelProvider(_mActivity)[CardViewModel::class.java]
     private val itemList: MutableList<MemorizationTestCard> = mutableListOf()
     private var itemCount = 0
-    private val cardIdAndCardTableIdList: Array<MemorizationTestCardId>
+    private var cardIdAndCardTableIdList: MutableList<MemorizationTestCardId>
     private var cardCount = 0
 
     init {
@@ -251,6 +251,7 @@ class MemorizationTestAdapter(private val _mActivity: MainActivity, private val 
             val data = itemList[position]
             buttonUpdate.setOnClickListener {
                 memorizationTestViewModel.position = position
+                memorizationTestViewModel.cardIndex = cardIdAndCardTableIdList.indexOfFirst { it.cardId == data.id && it.cardBundleId == data.cardBundleId }
                 cardViewModel.setValue(0, data.id, data.cardBundleId, data.question, data.answer, data.memorized, UPDATE)
                 _mActivity.supportActionBar!!.show()
                 _mActivity.changeFragment(R.id.nav_card)
@@ -260,6 +261,33 @@ class MemorizationTestAdapter(private val _mActivity: MainActivity, private val 
                 alertDialogBuilder.setTitle(R.string.dialog_title).setMessage(R.string.dialog_card_delete)
 
                 alertDialogBuilder.setPositiveButton(R.string.common_confirm) { dialog, _ ->
+                    val dbHelper = DBHelper(_mActivity)
+                    dbHelper.deleteCard(data.id, data.cardBundleId)
+                    dbHelper.close()
+                    val targetPosition  = itemList.indexOfFirst { it.id == data.id && it.cardBundleId == data.cardBundleId }
+                    val index = cardIdAndCardTableIdList.indexOfFirst { it.cardId == data.id && it.cardBundleId == data.cardBundleId }
+                    cardIdAndCardTableIdList.removeAt(index)
+                    cardCount = cardIdAndCardTableIdList.count()
+                    var nextItemIndex = index + itemCount - targetPosition
+                    itemList.removeAt(targetPosition)
+                    notifyItemRemoved(targetPosition)
+                    if (nextItemIndex <  cardCount) {
+                        itemList.add(dbHelper.readMemorizationTestCardItem(cardIdAndCardTableIdList[nextItemIndex].cardId, cardIdAndCardTableIdList[nextItemIndex].cardBundleId))
+                        notifyItemInserted(itemCount)
+                    } else if (cardCount >= 5) {
+                        nextItemIndex = index - targetPosition - 1
+                        itemList.add(0, dbHelper.readMemorizationTestCardItem(cardIdAndCardTableIdList[nextItemIndex].cardId, cardIdAndCardTableIdList[nextItemIndex].cardBundleId))
+                        notifyItemInserted(0)
+                    } else {
+                        itemCount = cardCount
+                    }
+
+                    memorizationTestViewModel.cardCenterIndex = getCardCenter(index+1)
+                    progressSeeBar.max = cardCount
+                    progressSeeBar.progress = if (itemCount == 0) 0 else index+1
+                    val text = "$progressText ${if(index + 1 > cardCount) cardCount else index + 1} / $cardCount"
+                    progressTextView.text = text
+
                     dialog.dismiss()
                 }
 

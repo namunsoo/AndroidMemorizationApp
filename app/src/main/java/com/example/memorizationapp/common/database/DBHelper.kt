@@ -31,6 +31,45 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         db.execSQL(createTableSql)
     }
 
+    fun getProgressionDegree(): Array<Int> {
+        val dbRead = this.readableDatabase
+        var cardTableNameIdList = listOf<Int>()
+        var cursor: Cursor
+        var cardBundleId: Int
+
+        var memorized = 0
+        var count = 0
+
+        cursor = dbRead.rawQuery(
+            "SELECT ${DB.CARD_BUNDLE.COLUMN_ID} FROM ${DB.CARD_BUNDLE.TABLE_NAME}",null
+        )
+        while (cursor.moveToNext()) {
+            cardBundleId = cursor.getInt(cursor.getColumnIndex(DB.CARD_BUNDLE.COLUMN_ID) as Int)
+            cardTableNameIdList = cardTableNameIdList + listOf(cardBundleId)
+        }
+
+        for (id in cardTableNameIdList) {
+            cursor = dbRead.query(
+                "${DB.CARD.TABLE_NAME}${id}",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            )
+            while (cursor.moveToNext()) {
+                count++
+                if (cursor.getInt(cursor.getColumnIndex(DB.CARD.COLUMN_MEMORIZED) as Int) == 1) {
+                    memorized++
+                }
+            }
+        }
+        dbRead.close()
+        return arrayOf(count, memorized, count - memorized)
+    }
+
     fun getFolderTree(): MutableList<Model<Item>> {
         val db = this.readableDatabase
         val mainCursor = db.rawQuery(
@@ -101,8 +140,8 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         if (mainId != null && subId != null){
             selection = "${DB.CARD_BUNDLE.COLUMN_MAIN_ID} = ? AND ${DB.CARD_BUNDLE.COLUMN_SUB_ID} = ?"
             selectionArgs = arrayOf(mainId.toString(), subId.toString())
-        } else if (mainId != null) {
-            selection = "${DB.CARD_BUNDLE.COLUMN_MAIN_ID} = ?"
+        } else if (mainId != null && subId == null) {
+            selection = "${DB.CARD_BUNDLE.COLUMN_MAIN_ID} = ? AND ${DB.CARD_BUNDLE.COLUMN_SUB_ID} IS NULL"
             selectionArgs = arrayOf(mainId.toString())
         } else {
             selection = "${DB.CARD_BUNDLE.COLUMN_MAIN_ID} IS NULL"
@@ -355,10 +394,10 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         dbWrite.close()
     }
 
-    fun readMemorizationTestCard(idList: List<Int>, cardType: String, cardSequence: String): Array<MemorizationTestCardId> {
+    fun readMemorizationTestCard(idList: List<Int>, cardType: String, cardSequence: String): MutableList<MemorizationTestCardId> {
         val dbRead = this.readableDatabase
         var cardTableNameIdList = listOf<Int>()
-        var array: Array<MemorizationTestCardId> = arrayOf()
+        var mutableList: MutableList<MemorizationTestCardId> = mutableListOf()
         var cursor: Cursor
         var cardId: Int
         var cardBundleId: Int
@@ -391,15 +430,15 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             while (cursor.moveToNext()) {
                 cardId = cursor.getInt(cursor.getColumnIndex(DB.CARD.COLUMN_ID) as Int)
                 cardBundleId = cursor.getInt(cursor.getColumnIndex(DB.CARD.CARD_BUNDLE_ID) as Int)
-                array += MemorizationTestCardId(cardId, cardBundleId, 0)
+                mutableList.add(MemorizationTestCardId(cardId, cardBundleId, 0))
             }
         }
         dbRead.close()
 
         if (cardSequence == "random") {
-            array.shuffle()
+            mutableList.shuffle()
         }
-        return array
+        return mutableList
     }
 
     fun readMemorizationTestCardItem(cardId: Int, cardBundleId: Int): MemorizationTestCard {
@@ -441,5 +480,6 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // Handle upgrades (if needed)
+        val test = 0
     }
 }
